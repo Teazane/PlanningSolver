@@ -48,3 +48,4 @@ Ressources python-constraint :
 
 Ressources Prolog : 
 - https://fr.wikipedia.org/wiki/Prolog
+- https://pcaboche.developpez.com/article/prolog/presentation/
