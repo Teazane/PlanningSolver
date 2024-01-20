@@ -1,0 +1,21 @@
+[[package]]
+name = "python-constraint"
+version = "1.4.0"
+description = "python-constraint is a module implementing support for handling CSPs (Constraint Solving Problems) over finite domain"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+dev = ["check-manifest", "nose"]
+test = ["coverage", "nose"]
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.9"
+content-hash = "60783d896f5837edd25227782bec2b408b2103f32a87be27620f7cd002703a4e"
+
+[metadata.files]
+python-constraint = [
+    {file = "python-constraint-1.4.0.tar.bz2", hash = "sha256:501d6f17afe0032dfc6ea6c0f8acc12e44f992733f00e8538961031ef27ccb8e"},
+]
