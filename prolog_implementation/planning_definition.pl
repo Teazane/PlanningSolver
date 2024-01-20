@@ -16,8 +16,8 @@ TODO
 /* Préférences horaires (après-midi/soir) */
 /* TODO */
 
-/* --- Définition des contraintes de joueurs --- /*
-/* Disponibilité (si certains joueurs ne sont pas présent tous les jours) */
+/* --- Définition des contraintes de joueureuses --- /*
+/* Disponibilité (si certain.e.s joueureuses ne sont pas présent tous les jours) */
 /* TODO */
 /* Parties demandées (choix exprimés) */
 /* TODO */
