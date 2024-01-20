@@ -24,6 +24,15 @@ Il y a quatre parties de proposées :
 - Fanny en propose une à 5 joueurs, peu importe quand : Scion.
 */
 
+/* --- Règles du problème */
+/* Trouver un créneau compatible avec la préférence exprimée. */
+time_appropriate_for_playing(Time, RPG):-
+    time(Time),
+    proposed_rpg(RPG),
+    moment(Time, X),
+    best_moment(RPG, X).
+    % Comment gérer les parties sans préférence ?
+
 /* --- Définition des créneaux horaires --- */
 /* Créneaux */
 time(samedi_am).
@@ -47,16 +56,26 @@ player(joe).
 
 /* --- Définition des contraintes de MJ/parties --- */
 /* Parties proposées */
-proposed_rpg(alice, alien_rpg, 4).
-proposed_rpg(david, ryuutama, 5).
-proposed_rpg(david, dnd, 6).
-proposed_rpg(alice, scion, 5).
+proposed_rpg(alien_rpg, 4).
+proposed_rpg(ryuutama, 5).
+proposed_rpg(dnd, 6).
+proposed_rpg(scion, 5).
+
+rpg_proposed_by(alien_rpg, alice).
+rpg_proposed_by(ryuutama, david).
+rpg_proposed_by(dnd, david).
+rpg_proposed_by(scion, alice).
+
+rpg_player_nb(alien_rpg, 4).
+rpg_player_nb(ryuutama, 5).
+rpg_player_nb(dnd, 6).
+rpg_player_nb(scion, 5).
 
 /* Préférences horaires (après-midi/soir) */
 best_moment(alien_rpg, soir).
 
-/* --- Définition des contraintes de joueurs --- /*
-/* Disponibilité (si certains joueurs ne sont pas présent tous les jours) */
+/* --- Définition des contraintes de joueureuses --- /*
+/* Disponibilité (si certain.e.s joueureuses ne sont pas présent tous les jours) */
 /* Non-applicable ici */
 
 /* Parties demandées (choix exprimés) */
