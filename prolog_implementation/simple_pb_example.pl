@@ -24,7 +24,7 @@ Il y a quatre parties de proposées :
 - Fanny en propose une à 5 joueurs, peu importe quand : Scion.
 */
 
-/* --- Règles du problème */
+/* ----- Règles du problème ----- */
 /* Trouver un créneau compatible avec la préférence exprimée. */
 time_appropriate_for_playing(Time, RPG):-
     time(Time),
@@ -33,6 +33,17 @@ time_appropriate_for_playing(Time, RPG):-
     best_moment(RPG, X).
     % Comment gérer les parties sans préférence ?
 
+/* Peut jouer si:
+    - Ne meujeute pas => OK
+    - Si nb max de places pas encore atteint => TODO
+    - Si ne joue pas déjà à autre chose => TODO
+*/
+can_play(Player, RPG):-
+    player(Player),
+    proposed_rpg(RPG),
+    not(rpg_proposed_by(RPG, Player)). % Ne meujeute pas
+
+/* ----- Variables du problème ----- */
 /* --- Définition des créneaux horaires --- */
 /* Créneaux */
 time(samedi_am).
@@ -91,6 +102,6 @@ would_like_to_play(ingrid, [alien_rpg]).
 would_like_to_play(joe, [dnd]).
 
 /* Pauses demandées (nombre exprimé) */
-would_like_to_rest(hermione).
-would_like_to_rest(ingrid).
-would_like_to_rest(joe).
+would_like_to_rest(hermione, 1).
+would_like_to_rest(ingrid, 1).
+would_like_to_rest(joe, 1).
