@@ -10,6 +10,7 @@ Il a été codé sous Windows, la plupart des commandes conseillées sont donc a
 1. [Prérequis](#prérequis)
 1. [Initialiser le projet](#initialiser-le-projet)
 1. [Problèmes connus](#problèmes-connus)
+1. [Documentation](#documentation)
 
 ## Objectifs du projet
 L'objectif théorique de ce projet est de proposer une plate-forme de résolution de contraintes pour établir un planning en fonction des souhaits des différentes personnes impliquées, des activités proposées et des horaires possibles. 
