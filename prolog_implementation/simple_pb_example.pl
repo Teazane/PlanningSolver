@@ -56,10 +56,10 @@ player(joe).
 
 /* --- Définition des contraintes de MJ/parties --- */
 /* Parties proposées */
-proposed_rpg(alien_rpg, 4).
-proposed_rpg(ryuutama, 5).
-proposed_rpg(dnd, 6).
-proposed_rpg(scion, 5).
+proposed_rpg(alien_rpg).
+proposed_rpg(ryuutama).
+proposed_rpg(dnd).
+proposed_rpg(scion).
 
 rpg_proposed_by(alien_rpg, alice).
 rpg_proposed_by(ryuutama, david).
