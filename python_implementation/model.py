@@ -1,4 +1,5 @@
 # Définition des objets du problème
+# Résolution du problème avec algorithme génétique
 
 # Créneau horaire
 class TimeSlot():
@@ -46,4 +47,14 @@ class Festival():
         
     def add_proposed_rpg(self, proposed_rpg):
         self.proposed_rpgs.append(proposed_rpg)
-
+        
+    def generate_planning():
+        # Initialisation
+        planning = {}
+        for time_slot in self.time_slots:
+            planning[time_slot] = None
+        # TODO
+            
+def planning_evaluation():
+    # TODO
+    pass
