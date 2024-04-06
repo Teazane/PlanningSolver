@@ -50,3 +50,8 @@ Ressources python-constraint :
 Ressources Prolog : 
 - https://fr.wikipedia.org/wiki/Prolog
 - https://pcaboche.developpez.com/article/prolog/presentation/
+
+Algorithme génétique : 
+- https://github.com/rayjasson98/Hybrid-Genetic-Algorithm-Simulated-Annealing-for-Presentation-Scheduling
+- https://www.codeproject.com/Articles/23111/Making-a-Class-Schedule-Using-a-Genetic-Algorithm
+- https://ichi.pro/fr/utilisation-d-algorithmes-genetiques-pour-planifier-les-horaires-43916892693120
