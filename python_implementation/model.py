@@ -1,5 +1,4 @@
 # Définition des objets du problème
-# Résolution du problème avec algorithme génétique
 
 # Créneau horaire
 class TimeSlot():
@@ -23,7 +22,7 @@ class Wish():
 class Player():
     def __init__(self, name, pause_nb, availabilities=[]):
         self.name = name # Ex : Bob
-        self.pause_nb = pause_nb # Ex : 2
+        self.pause_nb = pause_nb # Liste de ranks pour avoir des pauses. Ex : [8, 2]
         self.availabilities = availabilities # TimeSlot list
         
     def add_availability(time_slot):
@@ -35,6 +34,9 @@ class Festival():
         self.players = players # Player list
         self.wishes = wishes # Wish list
         self.proposed_rpgs = proposed_rpg # ProposedRPG list
+        
+    class NotExistingError(Exception):
+        pass
         
     def add_time_slot(self, time_slot):
         self.time_slots.append(time_slot)
@@ -48,13 +50,8 @@ class Festival():
     def add_proposed_rpg(self, proposed_rpg):
         self.proposed_rpgs.append(proposed_rpg)
         
-    def generate_planning():
-        # Initialisation
-        planning = {}
-        for time_slot in self.time_slots:
-            planning[time_slot] = None
-        # TODO
-            
-def planning_evaluation():
-    # TODO
-    pass
+    def add_wished_pause(self, player, rank):
+        if player in self.players:
+            player.pause_nb.append(rank)
+        else:
+            raise NotExistingError("Player does not exist.")
