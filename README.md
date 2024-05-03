@@ -17,6 +17,29 @@ L'objectif théorique de ce projet est de proposer une plate-forme de résolutio
 
 L'objectif appliqué de ce projet est la résolution des problématiques de planning pour répartir des parties de jeux de rôles en fonction des joueureuses, des MJs, des parties proposées et des souhaits exprimés (parties désirées et moments de repos à inclure).
 
+### Définition du problème et contraintes à résoudre
+Le planning est à constitué à l'occasion de la tenue d'un festival de jeu de rôle.
+
+Définition de l'évènement : 
+- Ce festival se déroule sur une succession de créneaux horaires de deux types : après-midi et soir.
+- Plusieurs personnes y participent et peuvent prendre les rôles de joueureuse et/ou de MJ.
+- Ces personnes ne sont pas forcément présentes sur l'intégralité des créneaux du festival. 
+- Les MJ proposent des parties en indiquant notamment le nombre de joueureuses minimum et maximum pour que la partie soit jouable, et éventuellement un type de créneau préférentiel pour son jeu (après-midi ou soir).
+- Les joueureuses expriment leurs préférences en classant les parties qu'iels voudraient jouer. Iels peuvent indiquer des parties qu'iels ne veulent au contraire pas du tout jouer (car déjà jouées antérieurement par exemple). 
+- Les joueureuses expriment également le leurs préférences concernant le nombre de moments de pause (c'est à dire des moments sans jouer) qu'iels souhaitent durant le festival.
+
+Voici les différentes contraintes à appliquer au planning : 
+1. Contraintes dures : 
+    - Un joueureuse (ou un.e MJ) ne peut pas participer à deux parties en même temps.
+    - Un joueureuse (ou un.e MJ) ne peut pas participer à une partie se déroulant sur un créneau horaire où iel n'est pas présent.
+    - Un joueureuse ne peut pas participer deux fois à la même partie.
+    - Un joueureuse ne peut pas participer à une partie qu'iel ne veut pas jouer.
+2. Contraintes faibles : 
+    - Un joueureuse doit jouer les parties qu'iel préfère selon ses souhaits exprimés, dans la mesure du possible.
+    - Un joueureuse doit obtenir des moments de pause selon ses souhaits exprimés, dans la mesure du possible.
+    - Une partie de jeu de rôle doit se dérouler sur le type de créneau préférentiel exprimé (après-midi ou soir), dans la mesure du possible.
+    - Si une partie est particulièrement demandée et que le.a MJ est d'accord, elle peut être proposée plusieurs fois pour satisfaire tout.es les joueureuses intéressé.es.
+
 ## Prérequis
 - Une version de [Git](https://git-scm.com/downloads) installée.
 
@@ -25,7 +48,7 @@ L'objectif appliqué de ce projet est la résolution des problématiques de plan
 
 ### Pour l'implémentation en Python 
 - Une version de [Python 3](https://www.python.org/downloads/) installée (préférentiellement 3.9).
-Les autres dépendances sont listées dans "pyproject.toml", le fichier utilisé par Poetry pour gérer les bibliothèques.
+Les autres dépendances sont listées dans "pyproject.toml", le fichier utilisé par [Poetry](https://python-poetry.org/docs/) pour gérer les bibliothèques.
 
 ## Initialiser le projet
 1. Télécharger les fichiers sources avec `git clone https://github.com/Teazane/PlanningSolver.git`
@@ -34,7 +57,7 @@ Les autres dépendances sont listées dans "pyproject.toml", le fichier utilisé
 [TODO]
 
 ### Pour l'implémentation en Python 
-1. Installer Poetry avec la commande : `pip install poetry`
+1. Installer [Poetry](https://python-poetry.org/docs/) avec la commande : `pip install poetry`
 1. Créer l'environnement virtuel et installer les dépendences : `poetry install`
 
 [TODO]
