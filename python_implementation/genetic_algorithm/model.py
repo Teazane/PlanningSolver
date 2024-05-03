@@ -13,14 +13,15 @@ class TimeSlot():
         return self.day + " " + self.moment
         
 class ProposedRPG():
-    def __init__(self, mj, game_title, player_nb, best_moment=None):
+    def __init__(self, mj, game_title, player_nb_min, player_nb_max, best_moment=None):
         self.mj = mj # Player
         self.game_title = game_title # Ex : Alien - Hadley's Hope
-        self.player_nb = player_nb # Ex : 4
+        self.player_nb_min = player_nb_min # Ex : 4
+        self.player_nb_max = player_nb_max # Ex : 5
         self.best_moment = best_moment # Ex : Après-midi
         
     def __repr__(self):
-        return f'ProposedRPG({self.mj}, {self.game_title}, {self.player_nb}, {self.best_moment})'
+        return f'ProposedRPG({self.mj}, {self.game_title}, {player_nb_min}, {self.player_nb_max}, {self.best_moment})'
     
     def __str__(self):
         return self.game_title
