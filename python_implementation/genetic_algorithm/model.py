@@ -6,12 +6,24 @@ class TimeSlot():
         self.day = day # Ex : Lundi
         self.moment = moment # Ex : Après-midi
         
+    def __repr__(self):
+        return f'TimeSlot({self.day}, {self.moment})'
+    
+    def __str__(self):
+        return self.day + " " + self.moment
+        
 class ProposedRPG():
-    def __init__(self, mj, player_nb, game_title, best_moment=None):
+    def __init__(self, mj, game_title, player_nb, best_moment=None):
         self.mj = mj # Player
-        self.player_nb = player_nb # Ex : 4
         self.game_title = game_title # Ex : Alien - Hadley's Hope
+        self.player_nb = player_nb # Ex : 4
         self.best_moment = best_moment # Ex : Après-midi
+        
+    def __repr__(self):
+        return f'ProposedRPG({self.mj}, {self.game_title}, {self.player_nb}, {self.best_moment})'
+    
+    def __str__(self):
+        return self.game_title
         
 class Wish():
     def __init__(self, player, proposed_rpg, wish_rank):
@@ -19,11 +31,20 @@ class Wish():
         self.proposed_rpg = proposed_rpg # ProposedRPG
         self.wish_rank = wish_rank # Ex : 10
         
+    def __repr__(self):
+        return f'Wish({self.player}, {self.proposed_rpg}, {self.wish_rank})'
+        
 class Player():
     def __init__(self, name, pause_nb, availabilities=[]):
         self.name = name # Ex : Bob
         self.pause_nb = pause_nb # Liste de ranks pour avoir des pauses. Ex : [8, 2]
         self.availabilities = availabilities # TimeSlot list
+        
+    def __repr__(self):
+        return f'Player({self.name}, {self.pause_nb}, {self.availabilities})'
+    
+    def __str__(self):
+        return self.name
         
     def add_availability(time_slot):
         self.availabilities.append(time_slot)
@@ -45,7 +66,13 @@ class Festival():
         self.players.append(player)
         
     def add_wish(self, wish):
-        self.wishes.append(wish)
+        if (wish.player in self.players):
+            if (wish.proposed_rpg in self.proposed_rpgs):
+                self.wishes.append(wish) # TODO: check rank
+            else:
+                raise NotExistingError("RPG does not exist.")
+        else:
+            raise NotExistingError("Player does not exist.")
         
     def add_proposed_rpg(self, proposed_rpg):
         self.proposed_rpgs.append(proposed_rpg)
