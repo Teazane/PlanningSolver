@@ -26,7 +26,7 @@ Définition de l'évènement :
 - Ces personnes ne sont pas forcément présentes sur l'intégralité des créneaux du festival. 
 - Les MJ proposent des parties en indiquant notamment le nombre de joueureuses minimum et maximum pour que la partie soit jouable, et éventuellement un type de créneau préférentiel pour son jeu (après-midi ou soir).
 - Les joueureuses expriment leurs préférences en classant les parties qu'iels voudraient jouer. Iels peuvent indiquer des parties qu'iels ne veulent au contraire pas du tout jouer (car déjà jouées antérieurement par exemple). 
-- Les joueureuses expriment également le leurs préférences concernant le nombre de moments de pause (c'est à dire des moments sans jouer) qu'iels souhaitent durant le festival.
+- Les joueureuses expriment également leurs préférences concernant le nombre de moments de pause (c'est à dire des moments sans jouer) qu'iels souhaitent durant le festival.
 
 Voici les différentes contraintes à appliquer au planning : 
 1. Contraintes dures : 
