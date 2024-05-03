@@ -35,6 +35,7 @@ Voici les différentes contraintes à appliquer au planning :
     - Un joueureuse ne peut pas participer deux fois à la même partie.
     - Un joueureuse ne peut pas participer à une partie qu'iel ne veut pas jouer.
     - Une partie ne peut pas être jouée sans son.a MJ pour la mener.
+    - Une partie ne peut pas être jouée si elle n'obtient pas un nombre de joueureuses compris entre le minimum et le maximum exprimé par le.a MJ.
 2. Contraintes faibles : 
     - Un joueureuse doit jouer les parties qu'iel préfère selon ses souhaits exprimés, dans la mesure du possible.
     - Un joueureuse doit obtenir des moments de pause selon ses souhaits exprimés, dans la mesure du possible.
