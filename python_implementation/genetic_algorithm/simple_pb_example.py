@@ -74,6 +74,7 @@ joe_wish_2 = Wish(joe, dnd, 1)
 festanche = Festival(
                 [samedi_am, samedi_soir], 
                 [alice, bob, clement, david, emilie, fanny, godric, hermione, ingrid, joe],
+                [alien, ryuutama, dnd, scion],
                 [
                     alice_wish_1, 
                     alice_wish_2, 
@@ -92,8 +93,7 @@ festanche = Festival(
                     hermione_wish_1, 
                     ingrid_wish_1, 
                     joe_wish_2 
-                ],
-                [alien, ryuutama, dnd, scion]
+                ]
             )
 
 # # Tests d'affichage
