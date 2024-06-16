@@ -24,7 +24,7 @@ Définition de l'évènement :
 - Ce festival se déroule sur une succession de créneaux horaires de deux types : après-midi et soir.
 - Plusieurs personnes y participent et peuvent prendre les rôles de joueureuse et/ou de MJ.
 - Ces personnes ne sont pas forcément présentes sur l'intégralité des créneaux du festival. 
-- Les MJ proposent des parties en indiquant notamment le nombre de joueureuses minimum et maximum pour que la partie soit jouable, et éventuellement un type de créneau préférentiel pour son jeu (après-midi ou soir). Elles ne seront pas nécessairement toutes jouées.
+- Les MJ proposent des parties en indiquant notamment le nombre de joueureuses minimum et maximum pour que la partie soit jouable, et éventuellement un type de créneau préférentiel pour son jeu (après-midi ou soir). Toutes les parties proposées ne seront pas nécessairement toutes jouées.
 - Les joueureuses expriment leurs préférences en classant les parties qu'iels voudraient jouer. Iels peuvent indiquer des parties qu'iels ne veulent au contraire pas du tout jouer (car déjà jouées antérieurement par exemple). 
 - Les joueureuses expriment également leurs préférences concernant le nombre de moments de pause (c'est à dire des moments sans jouer) qu'iels souhaitent durant le festival.
 
