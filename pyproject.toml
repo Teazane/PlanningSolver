@@ -6,7 +6,6 @@ authors = ["Teazane"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-python-constraint = "^1.4.0"
 pandas = "^2.2.2"
 
 [tool.poetry.dev-dependencies]
