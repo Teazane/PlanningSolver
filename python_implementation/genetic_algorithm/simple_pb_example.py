@@ -1,5 +1,5 @@
 """
-Example pour simplfier le pb : 
+Exemple pour simplifier le pb : 
 
 Nous disposons d'une journée pour jouer, un samedi.
 Il y a donc deux créneaux de jeux : 
