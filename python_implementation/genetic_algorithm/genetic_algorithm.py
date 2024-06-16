@@ -6,20 +6,20 @@ from pandas import DataFrame, Series
 import numpy as np
 
 class Planning():
-    def __init__(self, festival, matrix=None, planning=None):
+    def __init__(self, festival, matrix=None, schedule=None):
         self.festival = festival
         self.matrix = matrix
-        self.planning = planning
+        self.schedule = schedule
         self.evaluation_score = 0
-        if not matrix and not planning:
+        if not matrix and not schedule:
             self.generate_matrix()
-            self.conversion_matrix_to_planning()
-        elif not matrix and planning:
-            self.conversion_planning_to_matrix()
-        elif matrix and not planning:
-            self.conversion_matrix_to_planning()
+            self.conversion_matrix_to_schedule()
+        elif not matrix and schedule:
+            self.conversion_schedule_to_matrix()
+        elif matrix and not schedule:
+            self.conversion_matrix_to_schedule()
         else:
-            raise Exception("Only one of matrix or planning should be provided.")
+            raise Exception("Only one of matrix or schedule should be provided.")
         
     def generate_matrix(self):
         """
@@ -56,26 +56,26 @@ class Planning():
         # On crée le dataframe avec en index les noms de parties
         self.matrix = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
         
-    def planning_evaluation(self):
+    def schedule_evaluation(self):
         # TODO
         pass
 
-    def conversion_matrix_to_planning(self):
+    def conversion_matrix_to_schedule(self):
         """
-        Convert a pandas.DataFrame matrix format planning into a more readable JSON format.
-        The planning should be realistic (without any unsatisfied hard constraint) to be generated.
-        If the planning is not realistic, the generated JSON is empty.
+        Convert a pandas.DataFrame matrix format schedule into a more readable JSON format.
+        The schedule should be realistic (without any unsatisfied hard constraint) to be generated.
+        If the schedule is not realistic, the generated JSON is empty.
 
-        For example, if the matrix planning is: 
+        For example, if the matrix schedule is: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 0     | 0     | 1       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
         MYZ     | 1     | 0     | 1     | 1       | 0       | 0       |
 
-        This matrix planning is no realistic because D&D should not be played on saturday AND sunday afternoons.
+        This matrix schedule is no realistic because D&D should not be played on saturday AND sunday afternoons.
         The JSON format will be: {"games":[]}
 
-        But if the matrix planning is: 
+        But if the matrix schedule is: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 1     | 1     | 0       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
@@ -88,7 +88,7 @@ class Planning():
             { "name": "MYZ", "players":["Alice", "Chris"], "timeslot":"sat. a."}
         ]}
         """
-        if self.planning_evaluation() > 0:
+        if self.schedule_evaluation() > 0:
             games = []
             for game_name, row in self.matrix.iterrows():
                 game_info = {"name": game_name, "players": [], "timeslot": None}
@@ -100,15 +100,15 @@ class Planning():
                         if row[col] == 1:
                             game_info["players"].append(col)
                 games.append(game_info)
-            self.planning = json.dumps({"games": games})
+            self.schedule = json.dumps({"games": games})
         else:
-            self.planning = json.dumps({"games":[]})
+            self.schedule = json.dumps({"games":[]})
 
-    def conversion_planning_to_matrix(self):
+    def conversion_schedule_to_matrix(self):
         """
-        Convert a JSON format planning into a pandas.DataFrame matrix format.
-        The planning should not be empty to be generated.
-        If the planning is empty, the generated matrix is None.
+        Convert a JSON format schedule into a pandas.DataFrame matrix format.
+        The schedule should not be empty to be generated.
+        If the schedule is empty, the generated matrix is None.
 
         For example, if the JSON format is:
         {"games":[
@@ -117,13 +117,13 @@ class Planning():
             { "name": "MYZ", "players":["Alice", "Chris"], "timeslot":"sat. a."}
         ]}
 
-        The matrix planning will be: 
+        The matrix schedule will be: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 1     | 1     | 0       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
         MYZ     | 1     | 0     | 1     | 1       | 0       | 0       |
         """
-        games = self.planning["games"]
+        games = self.schedule["games"]
         if len(games) > 0:
             # Extraction des joueurs et créneaux horaires sans doublons
             players = set()
