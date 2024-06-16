@@ -1,0 +1,50 @@
+Tu es un développeur Python cherchant à développer un algorithme génétique pour évaluer des plannings. Voici les composantes du problème : 
+
+Le planning est à constitué à l'occasion de la tenue d'un festival de jeu de rôle.
+
+Définition de l'évènement : 
+- Ce festival se déroule sur une succession de créneaux horaires de deux types : après-midi et soir.
+- Plusieurs personnes y participent et peuvent prendre les rôles de joueur et/ou de MJ.
+- Ces personnes ne sont pas forcément présentes sur l'intégralité des créneaux du festival. 
+- Les MJ proposent des parties en indiquant notamment le nombre de joueurs minimum et maximum pour que la partie soit jouable, et éventuellement un type de créneau préférentiel pour son jeu (après-midi ou soir). Toutes les parties proposées ne seront pas nécessairement toutes jouées.
+- Les joueurs expriment leurs préférences en classant les parties qu'ils voudraient jouer. Ils peuvent indiquer des parties qu'ils ne veulent au contraire pas du tout jouer (car déjà jouées antérieurement par exemple). 
+- Les joueurs expriment également leurs préférences concernant le nombre de moments de pause (c'est à dire des moments sans jouer) qu'ils souhaitent durant le festival.
+
+Voici les différentes contraintes à appliquer au planning : 
+1. Contraintes dures : 
+    - Un joueur (ou un MJ) ne peut pas participer à deux parties en même temps.
+    - Un joueur (ou un MJ) ne peut pas participer à une partie se déroulant sur un créneau horaire où il n'est pas présent.
+    - Un joueur ne peut pas participer deux fois à la même partie.
+    - Un joueur ne peut pas participer à une partie qu'il ne veut pas jouer.
+    - Une partie ne peut pas être jouée sans son MJ pour la mener.
+    - Une partie ne peut pas être jouée si elle n'obtient pas un nombre de joueurs compris entre le minimum et le maximum exprimé par le MJ.
+    - Une partie ne peut se jouer que sur un seul créneau horaire.
+2. Contraintes faibles : 
+    - Un joueur doit jouer les parties qu'il préfère selon ses souhaits exprimés, dans la mesure du possible.
+    - Un joueur doit obtenir des moments de pause selon ses souhaits exprimés, dans la mesure du possible.
+    - Une partie de jeu de rôle doit se dérouler sur le type de créneau préférentiel exprimé (après-midi ou soir), dans la mesure du possible.
+	
+Je t'ai fourni le modèle permettant de représenter les différentes notions du problème dans le fichier model.py.
+
+Des plannings sont générés aléatoirement pour proposer des réponses à ce problème.
+Le planning est représenté à l'aide d'un DataFrame (librairie Pandas).
+Le Dataframe est construit de la façon suivante :
+- Chaque ligne représente une partie ("game") avec pour label le nom de cette partie ("name").
+- Les premières colonnes représentent les joueurs ("player") avec pour label les noms de ces joueurs.
+- Les colonnes suivantes représentent des créneaux horaires ("timeslot") avec pour label le créneau représenté en string (ex : "saturday afternoon").
+- Le Dataframe contient ensuite des données booléennes sous forme numériques (1 pour True et 0 pour False).
+
+Voici un exemple de Dataframe :
+| Alice | Bob | Chris | saturday afternoon | saturday night | sunday afternoon |
+D&D | 1 | 1 | 1 | 0 | 0 | 1 |
+Alien | 1 | 1 | 0 | 0 | 1 | 0 |
+MYZ | 1 | 0 | 1 | 1 | 0 | 0 |
+
+Ce DataFrame exemple représente un planning composé comme suit : 
+- Une partie D&D jouée par Alice, Bob et Chris le dimanche après-midi.
+- Une partie Alien jouée par Alice et Bob le samedi soir.
+- Une partie D&D jouée par Alice et Chris le samedi après-midi.
+- Bob est en pause le samedi après-midi (car il ne joue dans aucune partie sur ce créneau horaire).
+- Chris est en pause le samedi soir (car il ne joue dans aucune partie sur ce créneau horaire).
+
+En tenant compte du modèle fourni, et du format du DataFrame, propose-moi une fonction d'évaluation applicable dans le cadre d'un algorithme génétique permettant de déterminer le meilleur planning.
