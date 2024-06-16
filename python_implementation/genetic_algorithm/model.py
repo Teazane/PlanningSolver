@@ -36,7 +36,7 @@ class Player():
     def __str__(self):
         return self.name
         
-    def add_availability(time_slot):
+    def add_availability(self, time_slot):
         self.availabilities.append(time_slot)
 
 class ProposedRPG():
