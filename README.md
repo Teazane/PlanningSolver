@@ -30,15 +30,15 @@ Définition de l'évènement :
 
 Voici les différentes contraintes à appliquer au planning : 
 1. Contraintes dures : 
-    - Un joueureuse (ou un.e MJ) ne peut pas participer à deux parties en même temps.
-    - Un joueureuse (ou un.e MJ) ne peut pas participer à une partie se déroulant sur un créneau horaire où iel n'est pas présent.
-    - Un joueureuse ne peut pas participer deux fois à la même partie.
-    - Un joueureuse ne peut pas participer à une partie qu'iel ne veut pas jouer.
+    - Un.e joueureuse (ou un.e MJ) ne peut pas participer à deux parties en même temps.
+    - Un.e joueureuse (ou un.e MJ) ne peut pas participer à une partie se déroulant sur un créneau horaire où iel n'est pas présent.
+    - Un.e joueureuse ne peut pas participer deux fois à la même partie.
+    - Un.e joueureuse ne peut pas participer à une partie qu'iel ne veut pas jouer.
     - Une partie ne peut pas être jouée sans son.a MJ pour la mener.
     - Une partie ne peut pas être jouée si elle n'obtient pas un nombre de joueureuses compris entre le minimum et le maximum exprimé par le.a MJ.
 2. Contraintes faibles : 
-    - Un joueureuse doit jouer les parties qu'iel préfère selon ses souhaits exprimés, dans la mesure du possible.
-    - Un joueureuse doit obtenir des moments de pause selon ses souhaits exprimés, dans la mesure du possible.
+    - Un.e joueureuse doit jouer les parties qu'iel préfère selon ses souhaits exprimés, dans la mesure du possible.
+    - Un.e joueureuse doit obtenir des moments de pause selon ses souhaits exprimés, dans la mesure du possible.
     - Une partie de jeu de rôle doit se dérouler sur le type de créneau préférentiel exprimé (après-midi ou soir), dans la mesure du possible.
     - Si une partie est particulièrement demandée et que le.a MJ est d'accord, elle peut être proposée plusieurs fois pour satisfaire tout.es les joueureuses intéressé.es.
 
