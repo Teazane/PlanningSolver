@@ -6,42 +6,49 @@ from pandas import DataFrame, Series, concat
 import numpy as np
 
 class Planning():
-    def __init__(self, festival, matrix=None, schedule=None):
-        self.festival = festival
-        self.matrix = matrix
-        self.schedule = schedule
-        self.evaluation_score = 0
-        if not matrix and not schedule:
-            self.generate_matrix()
-            self.conversion_matrix_to_schedule()
-            self.schedule_evaluation()
-        elif not matrix and schedule:
-            self.conversion_schedule_to_matrix()
-            self.schedule_evaluation()
-        elif matrix and not schedule:
-            self.conversion_matrix_to_schedule()
-            self.schedule_evaluation()
-        else:
-            raise Exception("Only one of matrix or schedule should be provided, or none of them.")
-        
-    def generate_matrix(self):
+    def __init__(self, festival, schedule=None, json_string_schedule=None):
         """
-        Generate a pandas.DataFrame matrix where columns are players and time slots, and lines are proposed RPG.
+        Initialization of the Planning object.
+
+        It takes a model.Festival object then build the rest of the attributes.
+        If the schedule is not supplied, from pandas.DataFrame or JSON string object, a new one is generated.
+        The supplied or generated schedule is then evaluated.
+        """
+        self.festival = festival
+        self.schedule = schedule
+        self.json_string_schedule = json_string_schedule
+        self.evaluation_score = 0
+        if not schedule and not json_string_schedule:
+            self.generate_schedule()
+            self.schedule_evaluation()
+            self.conversion_df_schedule_to_json_string_schedule()
+        elif not schedule and json_string_schedule:
+            self.conversion_json_string_schedule_to_df_schedule()
+            self.schedule_evaluation()
+        elif schedule and not json_string_schedule:
+            self.schedule_evaluation()
+            self.conversion_df_schedule_to_json_string_schedule()
+        else:
+            raise Exception("Only one of DataFrame schedule or JSON string schedule should be provided, or none of them.")
+        
+    def generate_schedule(self):
+        """
+        Generate a pandas.DataFrame format schedule where columns are players and time slots, and lines are proposed RPG.
         
         For example:
             - Players are: Alice, Bob and Chris.
             - Time slots are: saturday afternoon, saturday night and sunday afternoon.
             - Proposed RPG are: D&D, Alien and MYZ.
         
-        So the generated matrix will look like : 
+        So the generated schedule will look like: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | NaN   | NaN   | NaN   | NaN     | NaN     | NaN     |
         Alien   | Nan   | NaN   | NaN   | NaN     | NaN     | NaN     |
         MYZ     | Nan   | NaN   | NaN   | NaN     | NaN     | NaN     |
         
-        Then, random boolean values are generated to fill the matrix.
+        Then, random boolean values are generated to fill the schedule.
         
-        For example, in the previous matrix, it could give: 
+        For example, in the previous schedule, it could give: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 0     | 0     | 1       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
@@ -57,8 +64,8 @@ class Planning():
         # On génère des données aléatoires
         data = np.random.choice(a=[0, 1], size=(len(self.festival.proposed_rpgs), len(columns)))
         # On crée le dataframe avec en index les noms de parties
-        self.matrix = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
-        return self.matrix
+        self.schedule = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
+        return self.schedule
         
     def schedule_evaluation(self):
         """
@@ -154,22 +161,22 @@ class Planning():
         self.evaluation_score = score
         return score
 
-    def conversion_matrix_to_schedule(self):
+    def conversion_df_schedule_to_json_string_schedule(self):
         """
-        Convert a pandas.DataFrame matrix format schedule into a more readable JSON format.
+        Convert a pandas.DataFrame format schedule into a more readable JSON format.
         The schedule should be realistic (without any unsatisfied hard constraint) to be generated.
         If the schedule is not realistic, the generated JSON is empty.
 
-        For example, if the matrix schedule is: 
+        For example, if the DataFrame schedule is: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 0     | 0     | 1       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
         MYZ     | 1     | 0     | 1     | 1       | 0       | 0       |
 
-        This matrix schedule is no realistic because D&D should not be played on saturday AND sunday afternoons.
+        This DataFrame schedule is no realistic because D&D should not be played on saturday AND sunday afternoons.
         The JSON format will be: {"games":[]}
 
-        But if the matrix schedule is: 
+        But if the DataFrame schedule is: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 1     | 1     | 0       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
@@ -182,11 +189,11 @@ class Planning():
             { "name": "MYZ", "players":["Alice", "Chris"], "timeslot":"sat. a."}
         ]}
         """
-        if self.schedule_evaluation() > 0:
+        if self.evaluation_score > 0: # TODO: vérifier qu'un planning non-cohérent a forcément un score de 0 ou moins
             games = []
-            for game_name, row in self.matrix.iterrows():
+            for game_name, row in self.schedule.iterrows():
                 game_info = {"name": game_name, "players": [], "timeslot": None}
-                for col in self.matrix.columns:
+                for col in self.schedule.columns:
                     if col.startswith(('sat.', 'sun.')): # TODO: vérifier de manière moins empirique
                         if row[col] == 1:
                             game_info["timeslot"] = col
@@ -199,11 +206,11 @@ class Planning():
             self.schedule = json.dumps({"games":[]})
         return self.schedule
 
-    def conversion_schedule_to_matrix(self):
+    def conversion_json_string_schedule_to_df_schedule(self):
         """
-        Convert a JSON format schedule into a pandas.DataFrame matrix format.
+        Convert a JSON format schedule into a pandas.DataFrame format.
         The schedule should not be empty to be generated.
-        If the schedule is empty, the generated matrix is None.
+        If the JSON schedule is empty, the generated DataFrame schedule is None.
 
         For example, if the JSON format is:
         {"games":[
@@ -212,7 +219,7 @@ class Planning():
             { "name": "MYZ", "players":["Alice", "Chris"], "timeslot":"sat. a."}
         ]}
 
-        The matrix schedule will be: 
+        The DataFrame schedule will be: 
                 | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
         D&D     | 1     | 1     | 1     | 0       | 0       | 1       |
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
@@ -238,10 +245,10 @@ class Planning():
                 if game["timeslot"]:
                     row[game["timeslot"]] = 1
                 df = df.append(Series(row, name=game["name"]))
-            self.matrix = df
+            self.schedule = df
         else:
-            self.matrix = None
-        return self.matrix
+            self.schedule = None
+        return self.schedule
 
 
 class GeneticAlgorithm():
