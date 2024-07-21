@@ -102,5 +102,8 @@ festanche = Festival(
 # print(str(alice)) # Alice
 # print(samedi_am) # samedi am
 
+# Test de l'objet Planning
 planning = Planning(festanche)
-print(planning.matrix)
+print(planning.schedule)
+planning.schedule_evaluation()
+print(planning.evaluation_score)

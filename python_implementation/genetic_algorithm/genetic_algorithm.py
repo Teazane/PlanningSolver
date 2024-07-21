@@ -20,8 +20,8 @@ class Planning():
         self.evaluation_score = 0
         if not schedule and not json_string_schedule:
             self.generate_schedule()
-            self.schedule_evaluation()
-            self.conversion_df_schedule_to_json_string_schedule()
+            # self.schedule_evaluation() # Commented for debug
+            # self.conversion_df_schedule_to_json_string_schedule() # Commented for debug
         elif not schedule and json_string_schedule:
             self.conversion_json_string_schedule_to_df_schedule()
             self.schedule_evaluation()
@@ -113,10 +113,10 @@ class Planning():
 
             # Vérifier les parties incompatibles
             for conflicting_game in game_rpg.conflicting_rpg:
-                if conflicting_game in self.schedule.index:
-                    conflicting_game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == conflicting_game)
+                if conflicting_game.game_title in self.schedule.index:
+                    conflicting_game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == conflicting_game.game_title)
                     for player in players:
-                        if self.schedule.loc[conflicting_game, player.name] == 1:
+                        if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
                             if player != game_rpg.dm and player != conflicting_game_rpg.dm:
                                 hard_constraints_violations += 1
         
@@ -157,7 +157,7 @@ class Planning():
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
         
         # Calcul final du score
-        score = -hard_constraints_violations * 1000 + soft_constraints_score # TODO voir si ce calcul final est assez souple
+        score = -hard_constraints_violations * 1000 + soft_constraints_score # TODO: voir si ce calcul final est assez souple
         self.evaluation_score = score
         return score
 
@@ -255,7 +255,6 @@ class GeneticAlgorithm():
     """
     Implementation of all genetic algorithm's process.
     """
-
     def crossover(self, planning_1, planning_2):
         """
         Crossover between two planning schedules to generate a new schedule child.
@@ -293,10 +292,10 @@ class GeneticAlgorithm():
                     continue
                 if random.random() < mutation_rate:
                     # Mutation pour les joueurs : inverser le statut de participation
-                    if col in festival.players: # TODO : Vérifier que l'égalité peut se faire (typage)
+                    if col in festival.players: # TODO: Vérifier que l'égalité peut se faire (typage)
                         mutated_schedule.at[index, col] = 1 - row[col]
                     # Mutation pour les créneaux horaires : activer ou désactiver la partie à ce créneau
-                    if col in festival.time_slots: # TODO : Vérifier que l'égalité peut se faire (typage)
+                    if col in festival.time_slots: # TODO: Vérifier que l'égalité peut se faire (typage)
                         mutated_schedule.at[index, col] = 1 - row[col]
         return mutated_schedule
     
