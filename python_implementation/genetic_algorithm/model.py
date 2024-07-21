@@ -47,19 +47,24 @@ class ProposedRPG():
         - A game title, which is a string object
         - A min and a max player number, which are integer objects
         - An optional best moment to play (such as "afternoon"), which is a string object
+        - An optional list of conflicting other proposed role-play games, which is a list of ProposedRPG objects
     """
-    def __init__(self, dm, game_title, player_nb_min, player_nb_max, best_moment=None):
+    def __init__(self, dm, game_title, player_nb_min, player_nb_max, best_moment=None, conflicting_rpg=[]):
         self.dm = dm # Player
         self.game_title = game_title # Ex : Alien - Hadley's Hope
         self.player_nb_min = player_nb_min # Ex : 4
         self.player_nb_max = player_nb_max # Ex : 5
         self.best_moment = best_moment # Ex : Après-midi
+        self.conflicting_rpg = conflicting_rpg # List of other ProposedRPG
         
     def __repr__(self):
         return f'ProposedRPG({self.dm}, {self.game_title}, {self.player_nb_min}, {self.player_nb_max}, {self.best_moment})'
     
     def __str__(self):
         return self.game_title
+    
+    def add_conflicting_rpg(self, conflicting_rpg):
+        self.conflicting_rpg.append(conflicting_rpg)
         
 class Wish():
     """

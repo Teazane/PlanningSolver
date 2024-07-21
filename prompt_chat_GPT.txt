@@ -14,8 +14,8 @@ Voici les différentes contraintes à appliquer au planning :
 1. Contraintes dures : 
     - Un joueur (ou un MJ) ne peut pas participer à deux parties en même temps.
     - Un joueur (ou un MJ) ne peut pas participer à une partie se déroulant sur un créneau horaire où il n'est pas présent.
-    - Un joueur ne peut pas participer deux fois à la même partie.
     - Un joueur ne peut pas participer à une partie qu'il ne veut pas jouer.
+    - Un joueur ne peut pas participer à deux parties incompatibles.
     - Une partie ne peut pas être jouée sans son MJ pour la mener.
     - Une partie ne peut pas être jouée si elle n'obtient pas un nombre de joueurs compris entre le minimum et le maximum exprimé par le MJ.
     - Une partie ne peut se jouer que sur un seul créneau horaire.

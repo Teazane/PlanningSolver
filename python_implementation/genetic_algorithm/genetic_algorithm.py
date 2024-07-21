@@ -128,6 +128,15 @@ class Planning():
             num_timeslots = sum(row[ts.__str__()] for ts in self.festival.time_slots)
             if num_timeslots != 1:
                 hard_constraints_violations += 1
+
+            # Vérifier les parties incompatibles
+            for conflicting_game in game_rpg.conflicting_rpg:
+                if conflicting_game in self.schedule.index:
+                    conflicting_game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == conflicting_game)
+                    for player in players:
+                        if self.schedule.loc[conflicting_game, player.name] == 1:
+                            if player != game_rpg.dm and player != conflicting_game_rpg.dm:
+                                hard_constraints_violations += 1
         
         # --- Contraintes faibles
         for player in self.festival.players:
@@ -153,18 +162,20 @@ class Planning():
                     # Pénaliser les pauses supplémentaires non souhaitées
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
         
-        # TODO ----------- arrêt de la relecture ChatGPT, lire la fin de la méthode
         # Respect des créneaux préférentiels
         for index, row in self.schedule.iterrows():
             game = index
-            game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game)
+            try:
+                game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game)
+            except StopIteration:
+                continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
             if game_rpg.best_moment:
                 preferred_ts = [ts for ts in self.festival.time_slots if ts.moment == game_rpg.best_moment]
                 if not any(row[ts.__str__()] == 1 for ts in preferred_ts):
-                    soft_constraints_score -= 1
+                    soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
         
         # Calcul final du score
-        score = -hard_constraints_violations * 1000 + soft_constraints_score
+        score = -hard_constraints_violations * 1000 + soft_constraints_score # TODO voir si ce calcul final est assez souple
         return score
 
     def conversion_matrix_to_schedule(self):
