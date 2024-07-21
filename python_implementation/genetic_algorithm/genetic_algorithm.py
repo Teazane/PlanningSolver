@@ -1,8 +1,8 @@
 # Résolution du problème avec algorithme génétique
 
-import json
+import json, random
 from model import *
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, concat
 import numpy as np
 
 class Planning():
@@ -14,13 +14,15 @@ class Planning():
         if not matrix and not schedule:
             self.generate_matrix()
             self.conversion_matrix_to_schedule()
+            self.schedule_evaluation()
         elif not matrix and schedule:
             self.conversion_schedule_to_matrix()
             self.schedule_evaluation()
         elif matrix and not schedule:
             self.conversion_matrix_to_schedule()
+            self.schedule_evaluation()
         else:
-            raise Exception("Only one of matrix or schedule should be provided.")
+            raise Exception("Only one of matrix or schedule should be provided, or none of them.")
         
     def generate_matrix(self):
         """
@@ -56,38 +58,11 @@ class Planning():
         data = np.random.choice(a=[0, 1], size=(len(self.festival.proposed_rpgs), len(columns)))
         # On crée le dataframe avec en index les noms de parties
         self.matrix = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
+        return self.matrix
         
     def schedule_evaluation(self):
         """
         Evaluation of a generated (or submitted) schedule based on hard and soft constraints fulfillment. 
-
-        Exemple d'utilisation:
-        # Construire le festival et les objets associés
-        time_slots = [TimeSlot("saturday", "afternoon"), TimeSlot("saturday", "night"), TimeSlot("sunday", "afternoon")]
-        players = [Player("Alice", [2], [TimeSlot("saturday", "afternoon"), TimeSlot("saturday", "night")]), 
-                Player("Bob", [2], [TimeSlot("saturday", "afternoon"), TimeSlot("saturday", "night")]), 
-                Player("Chris", [1], [TimeSlot("sunday", "afternoon")])]
-        proposed_rpgs = [ProposedRPG(players[0], "D&D", 2, 5, "afternoon"), 
-                        ProposedRPG(players[1], "Alien", 2, 4, "night")]
-        wishes = [Wish(players[0], proposed_rpgs[0], 10), Wish(players[1], proposed_rpgs[1], 8)]
-
-        festival = Festival(time_slots, players, proposed_rpgs, wishes)
-
-        # Construire un planning
-        data = {
-            "name": ["D&D", "Alien"],
-            "Alice": [1, 1],
-            "Bob": [1, 1],
-            "Chris": [1, 0],
-            "saturday afternoon": [0, 0],
-            "saturday night": [0, 1],
-            "sunday afternoon": [1, 0]
-        }
-        schedule = pd.DataFrame(data).set_index("name")
-
-        # Évaluer le planning
-        score = evaluate_schedule(schedule, festival)
-        print("Score du planning:", score)
         """
         score = 0
         hard_constraints_violations = 0
@@ -176,6 +151,7 @@ class Planning():
         
         # Calcul final du score
         score = -hard_constraints_violations * 1000 + soft_constraints_score # TODO voir si ce calcul final est assez souple
+        self.evaluation_score = score
         return score
 
     def conversion_matrix_to_schedule(self):
@@ -221,6 +197,7 @@ class Planning():
             self.schedule = json.dumps({"games": games})
         else:
             self.schedule = json.dumps({"games":[]})
+        return self.schedule
 
     def conversion_schedule_to_matrix(self):
         """
@@ -241,7 +218,7 @@ class Planning():
         Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
         MYZ     | 1     | 0     | 1     | 1       | 0       | 0       |
         """
-        games = self.schedule["games"]
+        games = json.loads(self.schedule)["games"]
         if len(games) > 0:
             # Extraction des joueurs et créneaux horaires sans doublons
             players = set()
@@ -264,3 +241,127 @@ class Planning():
             self.matrix = df
         else:
             self.matrix = None
+        return self.matrix
+
+
+class GeneticAlgorithm():
+    """
+    Implementation of all genetic algorithm's process.
+    """
+
+    def crossover(self, planning_1, planning_2):
+        """
+        Crossover between two planning schedules to generate a new schedule child.
+        
+        :param planning_1: Planning representing the first parent
+        :param planning_2: Planning representing the second parent
+        :type planning_1: genetic_algorithm.Planning
+        :type planning_2: genetic_algorithm.Planning
+        :return: DataFrame representing the child's schedule
+        :rtype: pandas.Dataframe
+        """
+        # Assurez-vous que les parents ont la même structure
+        assert planning_1.schedule.shape == planning_2.schedule.shape
+        # Choisir un point de croisement aléatoire
+        crossover_point = random.randint(1, planning_1.schedule.shape[0] - 1)
+        # Créer l'enfant en combinant les parents
+        child = concat([planning_1.schedule.iloc[:crossover_point], planning_2.schedule.iloc[crossover_point:]], axis=0)
+        return child
+    
+    def mutate(self, schedule, festival, mutation_rate=0.1):
+        """
+        Create a mutation in a schedule.
+        
+        :param schedule: DataFrame representing the original schedule
+        :param mutation_rate: Mutation rate (probability of mutation for each element)
+        :type schedule: pandas.DataFrame
+        :type mutation_rate: float
+        :return: DataFrame representing the mutated schedule
+        :rtype: pandas.DataFrame
+        """
+        mutated_schedule = schedule.copy()
+        for index, row in mutated_schedule.iterrows():
+            for col in row.index:
+                if col not in festival.players and col not in festival.time_slots:
+                    continue
+                if random.random() < mutation_rate:
+                    # Mutation pour les joueurs : inverser le statut de participation
+                    if col in festival.players: # TODO : Vérifier que l'égalité peut se faire (typage)
+                        mutated_schedule.at[index, col] = 1 - row[col]
+                    # Mutation pour les créneaux horaires : activer ou désactiver la partie à ce créneau
+                    if col in festival.time_slots: # TODO : Vérifier que l'égalité peut se faire (typage)
+                        mutated_schedule.at[index, col] = 1 - row[col]
+        return mutated_schedule
+    
+    def tournament_selection(self, population, k=3):
+        """
+        Select a parent by tournament method.
+    
+        :param population: Planning list
+        :param k: Tournament size (default 3)
+        :type population: genetic_algorithm.Planning
+        :type k: integer
+        :return: The best selected Planning
+        :rtype: genetic_algorithm.Planning
+        """
+        random_selection = random.sample(population, k)
+        # Tri en ordre décroissant pour que le meilleur score soit en premier
+        sorted_selection = sorted(random_selection, key=lambda x: x.evaluation_score, reverse=True)
+        return sorted_selection[0]
+
+    def generate_children(self, festival, parents, mutation_rate):
+        """
+        Crée une nouvelle génération de plannings.
+        
+        :param festival: Festival information
+        :param population: Planning list
+        :param mutation_rate: Mutation rate (probability of mutation for each element in the planning schedule)
+        :type festival: model.Festival
+        :type population: list(genetic_algorithm.Planning)
+        :type mutation_rate: integer
+        :return: New generation planning list
+        :rtype: list(genetic_algorithm.Planning)
+        """
+        new_population = []
+        size = len(parents)
+        for _ in range(size // 2):
+            # Sélectionner les parents
+            parent1 = self.tournament_selection(parents)
+            parent2 = self.tournament_selection(parents)
+            # Croisement
+            child1 = self.crossover(parent1, parent2)
+            child2 = self.crossover(parent2, parent1)
+            # Mutation
+            child1 = self.mutate(child1, mutation_rate)
+            child2 = self.mutate(child2, mutation_rate)
+            # Ajout des enfants à la nouvelle génération
+            new_population.extend([Planning(festival, child1), Planning(festival, child2)])
+        return new_population
+
+    def complete_process_run(self, festival, population_number, generations_number, mutation_rate=0.1):
+        """
+        Run a complete process of genetic algorithm
+
+        :param festival: Festival information
+        :param population_number: Initial population size
+        :param generations_number: Number of iteration to generate new children with previous ancestors
+        :param mutation_rate: Mutation rate (probability of mutation for each element in the planning schedule)
+        :type festival: model.Festival
+        :type population_number: integer
+        :type generations_number: integer
+        :type mutation_rate: float
+        """
+        population = []
+        for individual in population_number:
+            individual = Planning(festival=festival)
+            population.append(individual)
+        print("Initial generation :")
+        for individual in population:
+            print("\t Individual (score" + str(individual.evaluation_score) + ")")
+            print("\t" + str(individual.schedule))  
+        for round in range(generations_number):
+            population = self.generate_children(festival, population, mutation_rate)
+            print("Generation " + str(round+1) + " :")
+            for individual in population:
+                print("\t Individual (score" + str(individual.evaluation_score) + ")")
+                print("\t" + str(individual.schedule))
