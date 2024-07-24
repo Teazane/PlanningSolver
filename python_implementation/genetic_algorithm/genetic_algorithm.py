@@ -151,8 +151,9 @@ class Planning():
         for index, row in self.schedule.iterrows():
             game = index
             try:
-                game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game)
+                game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
             except StopIteration:
+                print("Game not found: " + game.game_title)
                 continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
             if game_rpg.best_moment:
                 preferred_ts = [ts for ts in self.festival.time_slots if ts.moment == game_rpg.best_moment]
