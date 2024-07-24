@@ -133,7 +133,10 @@ class Planning():
             obtained_pauses = 0
             for ts in self.festival.time_slots:
                 ts_str = ts.__str__()
-                if self.schedule.loc[:, (player.name, ts_str)].sum() == 0:
+                # if self.schedule.loc[:, (player.name, ts_str)].sum() == 0:
+                df_filtered = self.schedule.loc[(self.schedule[ts_str] == 1) & (self.schedule[player.name] == 1)]
+                number_of_rows = df_filtered.shape[0]
+                if number_of_rows == 0:
                     obtained_pauses += 1
         
             sorted_pause_wishes = sorted(player.pause_wishes, reverse=True)
