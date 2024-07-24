@@ -61,8 +61,9 @@ Les autres dépendances sont listées dans "pyproject.toml", le fichier utilisé
 ### Pour l'implémentation en Python 
 1. Installer [Poetry](https://python-poetry.org/docs/) avec la commande : `pip install poetry`
 1. Créer l'environnement virtuel et installer les dépendences : `poetry install`
+1. Lancez le fichier test avec : `poetry run python .\python_implementation\genetic_algorithm\simple_pb_example.py`
 
-[TODO]
+Si tout fonctionne, vous pouvez prendre exemple sur ce fichier pour créer vos propres paramètres de Festival et faire tourner l'algorithme.
 
 ## Problèmes connus
 Aucun problème connu à ce jour.
