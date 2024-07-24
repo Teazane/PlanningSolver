@@ -125,8 +125,8 @@ class Planning():
             # Calcul du contentement des joueurs de leurs parties attribuées
             player_wishes = [wish for wish in self.festival.wishes if wish.player == player]
             for wish in player_wishes:
-                game = wish.proposed_rpg.game_title
-                if self.schedule.loc[game, player.name] == 1:
+                wished_game = wish.proposed_rpg
+                if self.schedule.loc[wished_game, player.name] == 1:
                     soft_constraints_score += wish.wish_rank
             
             # Moments de pause
