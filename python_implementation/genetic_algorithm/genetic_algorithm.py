@@ -78,48 +78,53 @@ class Planning():
         # --- Contraintes dures
         for index, row in self.schedule.iterrows():
             game = index
-            # On retrouve la partie parmis les parties proposées
-            try:
-                game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
-            except StopIteration:
-                print("Game not found: " + game.game_title)
-                continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
-            players = [player for player in self.festival.players if row[player.name] == 1]
+            # Si toutes les colonnes sont égales à 0
+            if (self.schedule.loc[game] == 0).all():
+                # La partie n'est pas jouée, pas de violation de contrainte forte 
+                print("Game " + str(game) + " is not played")
+            else:
+                # On retrouve la partie parmis les parties proposées
+                try:
+                    game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
+                except StopIteration:
+                    print("Game not found: " + game.game_title)
+                    continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
+                players = [player for player in self.festival.players if row[player.name] == 1]
 
-            # Vérifier que le MJ est présent
-            if row[game_rpg.dm.name] != 1:
-                hard_constraints_violations += 1
-
-            # Vérifier le nombre de joueurs (sans compter le MJ)
-            if not (game_rpg.player_nb_min <= len(players) - 1 <= game_rpg.player_nb_max):
-                hard_constraints_violations += 1
-            
-            # Vérifier les disponibilités des joueurs et MJ
-            for player in players:
-                if not any(row[ts.__str__()] == 1 for ts in player.availabilities):
+                # Vérifier que le MJ est présent
+                if row[game_rpg.dm.name] != 1:
                     hard_constraints_violations += 1
-            
-            # Vérifier que chaque joueur n'a pas plusieurs parties en même temps
-            for ts in self.festival.time_slots:
-                ts_str = ts.__str__()
-                if row[ts_str] == 1:
-                    for player in players:
-                        if self.schedule.loc[:, ts_str].sum() > 1:
-                            hard_constraints_violations += 1
 
-            # Vérifier qu'une partie ne se déroule que sur un seul créneau
-            num_timeslots = sum(row[ts.__str__()] for ts in self.festival.time_slots)
-            if num_timeslots != 1:
-                hard_constraints_violations += 1
-
-            # Vérifier les parties incompatibles
-            for conflicting_game in game_rpg.conflicting_rpg:
-                if conflicting_game.game_title in self.schedule.index:
-                    conflicting_game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == conflicting_game.game_title)
-                    for player in players:
-                        if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
-                            if player != game_rpg.dm and player != conflicting_game_rpg.dm:
+                # Vérifier le nombre de joueurs (sans compter le MJ)
+                if not (game_rpg.player_nb_min <= len(players) - 1 <= game_rpg.player_nb_max):
+                    hard_constraints_violations += 1
+                
+                # Vérifier les disponibilités des joueurs et MJ
+                for player in players:
+                    if not any(row[ts.__str__()] == 1 for ts in player.availabilities):
+                        hard_constraints_violations += 1
+                
+                # Vérifier que chaque joueur n'a pas plusieurs parties en même temps
+                for ts in self.festival.time_slots:
+                    ts_str = ts.__str__()
+                    if row[ts_str] == 1:
+                        for player in players:
+                            if self.schedule.loc[:, ts_str].sum() > 1:
                                 hard_constraints_violations += 1
+
+                # Vérifier qu'une partie ne se déroule que sur un seul créneau
+                num_timeslots = sum(row[ts.__str__()] for ts in self.festival.time_slots)
+                if num_timeslots != 1:
+                    hard_constraints_violations += 1
+
+                # Vérifier les parties incompatibles
+                for conflicting_game in game_rpg.conflicting_rpg:
+                    if conflicting_game.game_title in self.schedule.index:
+                        conflicting_game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == conflicting_game.game_title)
+                        for player in players:
+                            if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
+                                if player != game_rpg.dm and player != conflicting_game_rpg.dm:
+                                    hard_constraints_violations += 1
         
         # --- Contraintes faibles
         for player in self.festival.players:
