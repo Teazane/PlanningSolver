@@ -80,8 +80,9 @@ class Planning():
             game = index
             # On retrouve la partie parmis les parties proposées
             try:
-                game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game)
+                game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
             except StopIteration:
+                print("Game not found: " + game.game_title)
                 continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
             players = [player for player in self.festival.players if row[player.name] == 1]
 
@@ -133,7 +134,6 @@ class Planning():
             obtained_pauses = 0
             for ts in self.festival.time_slots:
                 ts_str = ts.__str__()
-                # if self.schedule.loc[:, (player.name, ts_str)].sum() == 0:
                 df_filtered = self.schedule.loc[(self.schedule[ts_str] == 1) & (self.schedule[player.name] == 1)]
                 number_of_rows = df_filtered.shape[0]
                 if number_of_rows == 0:
