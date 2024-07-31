@@ -141,9 +141,9 @@ class Planning():
             print("Soft constraints : player : " + str(player))
             # Calcul du contentement des joueurs de leurs parties attribuées
             player_wishes = [wish for wish in self.festival.wishes if wish.player == player]
+            total_wish = 0
             for wish in player_wishes:
                 wished_game = wish.proposed_rpg
-                total_wish = 0
                 if self.schedule.loc[wished_game, player.name] == 1:
                     soft_constraints_score += wish.wish_rank
                     total_wish += wish.wish_rank
