@@ -41,7 +41,7 @@ fanny = Player("Fanny", [], [samedi_am, samedi_soir])
 godric = Player("Godric", [], [samedi_am, samedi_soir])
 hermione = Player("Hermione", [2], [samedi_am, samedi_soir])
 ingrid = Player("Ingrid", [1], [samedi_am, samedi_soir])
-joe = Player("Joe", [2], [samedi_am, samedi_soir])
+joe = Player("Joe", [1, 2], [samedi_am, samedi_soir])
 
 # --- Définition des contraintes de MJ/parties --- #
 # Parties proposées
