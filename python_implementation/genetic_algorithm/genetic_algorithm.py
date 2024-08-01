@@ -309,9 +309,9 @@ class GeneticAlgorithm():
         # Assurez-vous que les parents ont la même structure
         assert planning_1.schedule.shape == planning_2.schedule.shape
         # Choisir un point de croisement aléatoire
-        crossover_point = random.randint(1, planning_1.schedule.shape[0] - 1)
+        crossover_point = random.randint(1, planning_1.schedule.shape[1] - 1)
         # Créer l'enfant en combinant les parents
-        child = concat([planning_1.schedule.iloc[:crossover_point], planning_2.schedule.iloc[crossover_point:]], axis=0)
+        child = concat([planning_1.schedule.iloc[:, :crossover_point], planning_2.schedule.iloc[:, crossover_point:]], axis=1)
         return child
     
     def mutate(self, schedule, festival, mutation_rate=0.1):
