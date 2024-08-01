@@ -177,7 +177,7 @@ class Planning():
                     # Pénaliser les pauses supplémentaires non souhaitées
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
                     total_pauses -= 1
-            print("- Total pause score " + str(total_pauses))
+            print("- Total pause score " + str(total_pauses) + " (" + str(obtained_pauses) + ")")
         
         # Respect des créneaux préférentiels
         for index, row in self.schedule.iterrows():
