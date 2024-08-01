@@ -68,7 +68,8 @@ godric_wish_1 = Wish(godric, scion, 1)
 godric_wish_2 = Wish(godric, dnd, 2)
 hermione_wish_1 = Wish(hermione, ryuutama, 1)
 ingrid_wish_1 = Wish(ingrid, alien, 2)
-joe_wish_2 = Wish(joe, dnd, 1)
+joe_wish_1 = Wish(joe, dnd, 1)
+joe_wish_2 = Wish(joe, ryuutama, -1)
 
 # --- Définition du système complet --- #
 festanche = Festival(

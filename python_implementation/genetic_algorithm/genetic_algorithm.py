@@ -136,6 +136,15 @@ class Planning():
                                     hard_constraints_violations += 1
                                     print("- Conflicting game " + str(player) + " " + str(conflicting_game))
 
+                # Vérifier qu'aucun joueur n'est dans une partie notée à -1
+                for player in players:
+                    player_wishes = [wish for wish in self.festival.wishes if (wish.player == player and wish.proposed_rpg == game)]
+                    for wish in player_wishes:
+                        if wish.wish_rank == -1:
+                            hard_constraints_violations += 1
+                            print("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
+
+
         # --- Contraintes faibles
         for player in self.festival.players:
             print("Soft constraints : player : " + str(player))
