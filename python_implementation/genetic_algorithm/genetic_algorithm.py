@@ -328,15 +328,10 @@ class GeneticAlgorithm():
         mutated_schedule = schedule.copy()
         for index, row in mutated_schedule.iterrows():
             for col in row.index:
-                if col not in festival.players and col not in festival.time_slots:
-                    continue
-                if random.random() < mutation_rate:
-                    # Mutation pour les joueurs : inverser le statut de participation
-                    if col in festival.players: # TODO: Vérifier que l'égalité peut se faire (typage)
-                        mutated_schedule.at[index, col] = 1 - row[col]
-                    # Mutation pour les créneaux horaires : activer ou désactiver la partie à ce créneau
-                    if col in festival.time_slots: # TODO: Vérifier que l'égalité peut se faire (typage)
-                        mutated_schedule.at[index, col] = 1 - row[col]
+                rand = random.random()
+                if rand < mutation_rate:
+                    #print('mutate index:' + str(index) + ', col:' + str(col))
+                    mutated_schedule.at[index, col] = 1 - row[col]
         return mutated_schedule
     
     def tournament_selection(self, population, k=3):
