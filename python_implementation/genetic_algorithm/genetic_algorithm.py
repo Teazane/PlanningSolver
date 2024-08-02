@@ -18,16 +18,16 @@ class Planning():
         self.schedule = schedule
         self.json_string_schedule = json_string_schedule
         self.evaluation_score = 0
-        if not schedule and not json_string_schedule:
+        if schedule is None and json_string_schedule is None:
             self.generate_schedule()
-            # self.schedule_evaluation() # Commented for debug
+            self.schedule_evaluation() # Commented for debug
             # self.conversion_df_schedule_to_json_string_schedule() # Commented for debug
-        elif not schedule and json_string_schedule:
+        elif schedule is None and json_string_schedule is not None:
             self.conversion_json_string_schedule_to_df_schedule()
             self.schedule_evaluation()
-        elif schedule and not json_string_schedule:
+        elif schedule is not None and json_string_schedule is None:
             self.schedule_evaluation()
-            self.conversion_df_schedule_to_json_string_schedule()
+            #self.conversion_df_schedule_to_json_string_schedule()
         else:
             raise Exception("Only one of DataFrame schedule or JSON string schedule should be provided, or none of them.")
         
@@ -81,32 +81,33 @@ class Planning():
             # Si toutes les colonnes sont égales à 0
             if (self.schedule.loc[game] == 0).all():
                 # La partie n'est pas jouée, pas de violation de contrainte forte 
-                print("Game " + str(game) + " is not played")
+                #print("Game " + str(game) + " is not played")
+                continue
             else:
                 # On retrouve la partie parmis les parties proposées
                 try:
                     game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
                 except StopIteration:
-                    print("Game not found: " + game.game_title)
+                    #print("Game not found: " + game.game_title)
                     continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
                 players = [player for player in self.festival.players if row[player.name] == 1]
 
-                print("Hard constraints : game : " + str(game))
+                #print("Hard constraints : game : " + str(game))
                 # Vérifier que le MJ est présent
                 if row[game_rpg.dm.name] != 1:
                     hard_constraints_violations += 1
-                    print("- Absent MJ " + str(game_rpg.dm))
+                    #print("- Absent MJ " + str(game_rpg.dm))
 
                 # Vérifier le nombre de joueurs (sans compter le MJ)
                 if not (game_rpg.player_nb_min <= len(players) - 1 <= game_rpg.player_nb_max):
                     hard_constraints_violations += 1
-                    print("- Bad player count " + str(len(players)))
+                    #print("- Bad player count " + str(len(players)))
 
                 # Vérifier les disponibilités des joueurs et MJ
                 for player in players:
                     if not any(row[ts.__str__()] == 1 for ts in player.availabilities):
                         hard_constraints_violations += 1
-                        print("- Player not present " + str(player))
+                        #print("- Player not present " + str(player))
 
                 # Vérifier que chaque joueur n'a pas plusieurs parties en même temps
                 for ts in self.festival.time_slots:
@@ -118,13 +119,13 @@ class Planning():
                                 if(game2.game_title != game.game_title and self.schedule.loc[game2, ts_str] == 1):
                                     if(self.schedule.loc[game2, player.name] == 1):
                                         hard_constraints_violations += 1
-                                        print("- Player play something else " + str(player) + " " + str(game2))
+                                        #print("- Player play something else " + str(player) + " " + str(game2))
 
                 # Vérifier qu'une partie ne se déroule que sur un seul créneau
                 num_timeslots = sum(row[ts.__str__()] for ts in self.festival.time_slots)
                 if num_timeslots != 1:
                     hard_constraints_violations += 1
-                    print("- Bad number of timeslot " + str(num_timeslots))
+                    #print("- Bad number of timeslot " + str(num_timeslots))
 
                 # Vérifier les parties incompatibles
                 for conflicting_game in game_rpg.conflicting_rpg:
@@ -134,7 +135,7 @@ class Planning():
                             if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
                                 if player != game_rpg.dm and player != conflicting_game_rpg.dm:
                                     hard_constraints_violations += 1
-                                    print("- Conflicting game " + str(player) + " " + str(conflicting_game))
+                                    #print("- Conflicting game " + str(player) + " " + str(conflicting_game))
 
                 # Vérifier qu'aucun joueur n'est dans une partie notée à -1
                 for player in players:
@@ -142,12 +143,12 @@ class Planning():
                     for wish in player_wishes:
                         if wish.wish_rank == -1:
                             hard_constraints_violations += 1
-                            print("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
+                            #print("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
 
 
         # --- Contraintes faibles
         for player in self.festival.players:
-            print("Soft constraints : player : " + str(player))
+            #print("Soft constraints : player : " + str(player))
             # Calcul du contentement des joueurs de leurs parties attribuées
             player_wishes = [wish for wish in self.festival.wishes if wish.player == player]
             total_wish = 0
@@ -156,7 +157,7 @@ class Planning():
                 if self.schedule.loc[wished_game, player.name] == 1:
                     soft_constraints_score += wish.wish_rank
                     total_wish += wish.wish_rank
-            print("- Total game score " + str(total_wish))
+            #print("- Total game score " + str(total_wish))
 
             # Moments de pause
             obtained_pauses = 0
@@ -177,7 +178,7 @@ class Planning():
                     # Pénaliser les pauses supplémentaires non souhaitées
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
                     total_pauses -= 1
-            print("- Total pause score " + str(total_pauses) + " (" + str(obtained_pauses) + ")")
+            #print("- Total pause score " + str(total_pauses) + " (" + str(obtained_pauses) + ")")
         
         # Respect des créneaux préférentiels
         for index, row in self.schedule.iterrows():
@@ -185,16 +186,16 @@ class Planning():
             try:
                 game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
             except StopIteration:
-                print("Game not found: " + game.game_title)
+                #print("Game not found: " + game.game_title)
                 continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
-            print("Soft constraints : game : " + str(game))
+            #print("Soft constraints : game : " + str(game))
             total_game = 0
             if game_rpg.best_moment:
                 preferred_ts = [ts for ts in self.festival.time_slots if ts.moment == game_rpg.best_moment]
                 if not any(row[ts.__str__()] == 1 for ts in preferred_ts):
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
                     total_game -= 1
-            print("- Total game timeslot score " + str(total_game))
+            #print("- Total game timeslot score " + str(total_game))
 
         # Calcul final du score
         score = -hard_constraints_violations * 1000 + soft_constraints_score # TODO: voir si ce calcul final est assez souple
@@ -393,7 +394,7 @@ class GeneticAlgorithm():
         :type mutation_rate: float
         """
         population = []
-        for individual in population_number:
+        for _ in range(population_number):
             individual = Planning(festival=festival)
             population.append(individual)
         print("Initial generation :")
