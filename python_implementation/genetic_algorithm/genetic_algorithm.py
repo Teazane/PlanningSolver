@@ -314,7 +314,7 @@ class GeneticAlgorithm():
         child = concat([planning_1.schedule.iloc[:, :crossover_point], planning_2.schedule.iloc[:, crossover_point:]], axis=1)
         return child
     
-    def mutate(self, schedule, festival, mutation_rate=0.1):
+    def mutate(self, schedule, mutation_rate=0.1):
         """
         Create a mutation in a schedule.
         
