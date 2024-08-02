@@ -139,7 +139,7 @@ pierre_wish_12 = Wish(pierre, scion, 12)
 # Voeux de Rémi
 # TODO
 # Voeux de Scean
-scean_wish_1 = Wish(sean, stonebelow, 11)
+sean_wish_1 = Wish(sean, stonebelow, 11)
 sean_wish_2 = Wish(sean, vaesen, 10)
 sean_wish_3 = Wish(sean, veggie_patch, -1)
 sean_wish_4 = Wish(sean, ten_candles, -1)
@@ -202,7 +202,7 @@ festanche = Festival(
                     lucile_wish_1, lucile_wish_2, lucile_wish_3, lucile_wish_4, lucile_wish_5, lucile_wish_6, lucile_wish_7, lucile_wish_8, lucile_wish_9, lucile_wish_10, 
                     marion_wish_1, marion_wish_2, marion_wish_3, marion_wish_4, marion_wish_5, marion_wish_6, marion_wish_7, marion_wish_8, marion_wish_9, marion_wish_10, marion_wish_11, marion_wish_12, 
                     pierre_wish_1, pierre_wish_2, pierre_wish_3, pierre_wish_4, pierre_wish_5, pierre_wish_6, pierre_wish_7, pierre_wish_8, pierre_wish_9, pierre_wish_10, pierre_wish_11, pierre_wish_12, 
-                    scean_wish_1, scean_wish_2, scean_wish_3, scean_wish_4, scean_wish_5, scean_wish_6, scean_wish_7, scean_wish_8, scean_wish_9, scean_wish_10, scean_wish_11, scean_wish_12, 
+                    sean_wish_1, sean_wish_2, sean_wish_3, sean_wish_4, sean_wish_5, sean_wish_6, sean_wish_7, sean_wish_8, sean_wish_9, sean_wish_10, sean_wish_11, sean_wish_12, 
                     thomas_wish_1, thomas_wish_2, thomas_wish_3, thomas_wish_4, thomas_wish_5, thomas_wish_6, thomas_wish_7, thomas_wish_8, thomas_wish_9, thomas_wish_10, thomas_wish_11, thomas_wish_12, 
                     tom_wish_1, tom_wish_2, tom_wish_3, tom_wish_4, tom_wish_5, tom_wish_6, tom_wish_7, tom_wish_8, tom_wish_9, tom_wish_10, tom_wish_11, 
                     yohan_wish_1, yohan_wish_2, yohan_wish_3, yohan_wish_4, yohan_wish_5, yohan_wish_6, yohan_wish_7, yohan_wish_8, yohan_wish_9, yohan_wish_10
