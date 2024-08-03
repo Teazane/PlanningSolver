@@ -19,6 +19,8 @@ file_output.setFormatter(formatter)
 logger.addHandler(file_output)
 
 class Planning():
+    hard_constraints_time = 0
+    soft_constraints_time = 0
     def __init__(self, festival, schedule=None, json_string_schedule=None):
         """
         Initialization of the Planning object.
@@ -88,6 +90,7 @@ class Planning():
         hard_constraints_violations = 0
         soft_constraints_score = 0
         # --- Contraintes dures
+        hard_constraints_start = time.perf_counter()
         for index, row in self.schedule.iterrows():
             game = index
             # Si toutes les colonnes sont égales à 0
@@ -156,8 +159,10 @@ class Planning():
                         if wish.wish_rank == -1:
                             hard_constraints_violations += 1
                             #print("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
+        Planning.hard_constraints_time += time.perf_counter() - hard_constraints_start
 
 
+        soft_constraints_start = time.perf_counter()
         # --- Contraintes faibles
         for player in self.festival.players:
             #print("Soft constraints : player : " + str(player))
@@ -208,6 +213,7 @@ class Planning():
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
                     total_game -= 1
             #print("- Total game timeslot score " + str(total_game))
+        Planning.soft_constraints_time += time.perf_counter() - soft_constraints_start
 
         # Calcul final du score
         score = -hard_constraints_violations * 1000 + soft_constraints_score # TODO: voir si ce calcul final est assez souple
@@ -439,6 +445,8 @@ class GeneticAlgorithm():
         logger.info('Total crossover time: ' + str(self.crosserover_time))
         logger.info('Total mutation time: ' + str(self.mutatione_time))
         logger.info('Total child evaluation time: ' + str(self.evaluation_time))
+        logger.info('Total hard constraints time : ' + str(Planning.hard_constraints_time))
+        logger.info('Total soft constraints time : ' + str(Planning.soft_constraints_time))
         logger.info('-------- End --------')
 
 
