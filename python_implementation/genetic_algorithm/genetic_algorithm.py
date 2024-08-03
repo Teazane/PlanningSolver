@@ -1,9 +1,22 @@
 # Résolution du problème avec algorithme génétique
-
-import json, random, time
+import json, random, time, logging, pathlib, sys
+import logging.handlers
 from model import *
 from pandas import DataFrame, Series, concat
 import numpy as np
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+cmd_output = logging.StreamHandler(sys.stdout) # Log en console
+cmd_output.setLevel(logging.DEBUG)
+cmd_output.setFormatter(formatter)
+logger.addHandler(cmd_output)
+log_filepath = pathlib.Path(__file__).parent.parent.parent / 'log' / "genetic_algorithm.log"
+file_output = logging.handlers.TimedRotatingFileHandler(filename=log_filepath.resolve(), encoding="utf-8")
+file_output.setLevel(logging.DEBUG)
+file_output.setFormatter(formatter)
+logger.addHandler(file_output)
 
 class Planning():
     def __init__(self, festival, schedule=None, json_string_schedule=None):
@@ -27,7 +40,7 @@ class Planning():
             self.schedule_evaluation()
         elif schedule is not None and json_string_schedule is None:
             self.schedule_evaluation()
-            #self.conversion_df_schedule_to_json_string_schedule()
+            # self.conversion_df_schedule_to_json_string_schedule()
         else:
             raise Exception("Only one of DataFrame schedule or JSON string schedule should be provided, or none of them.")
         
@@ -77,18 +90,17 @@ class Planning():
         # --- Contraintes dures
         for index, row in self.schedule.iterrows():
             game = index
-            # TODO : à corriger 
             # Si toutes les colonnes sont égales à 0
             if (self.schedule.loc[game] == 0).all():
                 # La partie n'est pas jouée, pas de violation de contrainte forte 
-                #print("Game " + str(game) + " is not played")
+                # print("Game " + str(game) + " is not played")
                 continue
             else:
                 # On retrouve la partie parmis les parties proposées
                 try:
                     game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
                 except StopIteration:
-                    #print("Game not found: " + game.game_title)
+                    logger.error("Game not found: " + game.game_title)
                     continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
                 players = [player for player in self.festival.players if row[player.name] == 1]
 
@@ -293,15 +305,16 @@ class Planning():
 
 
 class GeneticAlgorithm():
+    """
+    Implementation of all genetic algorithm's process.
+    """
     def __init__(self):
         self.initial_gen_time = 0
         self.selection_time = 0
         self.crosserover_time = 0
         self.mutatione_time = 0
         self.evaluation_time = 0
-    """
-    Implementation of all genetic algorithm's process.
-    """
+    
     def crossover(self, planning_1, planning_2):
         """
         Crossover between two planning schedules to generate a new schedule child.
@@ -337,7 +350,6 @@ class GeneticAlgorithm():
             for col in row.index:
                 rand = random.random()
                 if rand < mutation_rate:
-                    #print('mutate index:' + str(index) + ', col:' + str(col))
                     mutated_schedule.at[index, col] = 1 - row[col]
         return mutated_schedule
     
@@ -408,25 +420,25 @@ class GeneticAlgorithm():
         :type mutation_rate: float
         """
         population = []
-        print('Start')
+        logger.info('-------- Start --------')
         start_time = time.perf_counter()
         for _ in range(population_number):
             individual = Planning(festival=festival)
             population.append(individual)
         self.initial_gen_time = time.perf_counter() - start_time
-        print('Initial population generation over')
+        logger.info('Initial population generation over')
         for gen in range(generations_number):
-            print('gen : ' + str(gen))
+            logger.debug('Generation: ' + str(gen))
             population = self.generate_children(festival, population, mutation_rate)
-        print('Final results :')
         population_sorted = sorted(population, key=lambda x: x.evaluation_score, reverse=True)
-        print(str(population_sorted[0].schedule))
-        print(str(population_sorted[0].evaluation_score))
-        print('Total execution time : ' + str(time.perf_counter() - start_time))
-        print('Initial gen time : ' + str(self.initial_gen_time))
-        print('Total selection time : ' + str(self.selection_time))
-        print('Total crossover time : ' + str(self.crosserover_time))
-        print('Total mutation time : ' + str(self.mutatione_time))
-        print('Total child evaluation time : ' + str(self.evaluation_time))
+        logger.info('Best final planning:\n' + str(population_sorted[0].schedule))
+        logger.info('Best final score: ' + str(population_sorted[0].evaluation_score))
+        logger.info('Total execution time: ' + str(time.perf_counter() - start_time))
+        logger.info('Initial gen time: ' + str(self.initial_gen_time))
+        logger.info('Total selection time: ' + str(self.selection_time))
+        logger.info('Total crossover time: ' + str(self.crosserover_time))
+        logger.info('Total mutation time: ' + str(self.mutatione_time))
+        logger.info('Total child evaluation time: ' + str(self.evaluation_time))
+        logger.info('-------- End --------')
 
 
