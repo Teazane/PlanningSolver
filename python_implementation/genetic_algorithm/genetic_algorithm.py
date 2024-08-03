@@ -1,6 +1,6 @@
 # Résolution du problème avec algorithme génétique
 
-import json, random
+import json, random, time
 from model import *
 from pandas import DataFrame, Series, concat
 import numpy as np
@@ -293,6 +293,12 @@ class Planning():
 
 
 class GeneticAlgorithm():
+    def __init__(self):
+        self.initial_gen_time = 0
+        self.selection_time = 0
+        self.crosserover_time = 0
+        self.mutatione_time = 0
+        self.evaluation_time = 0
     """
     Implementation of all genetic algorithm's process.
     """
@@ -368,16 +374,24 @@ class GeneticAlgorithm():
         size = len(parents)
         for _ in range(size // 2):
             # Sélectionner les parents
+            start = time.perf_counter()
             parent1 = self.tournament_selection(parents)
             parent2 = self.tournament_selection(parents)
+            self.selection_time += time.perf_counter() - start
             # Croisement
+            start = time.perf_counter()
             child1 = self.crossover(parent1, parent2)
             child2 = self.crossover(parent2, parent1)
+            self.crosserover_time +=  time.perf_counter() - start
             # Mutation
+            start = time.perf_counter()
             child1 = self.mutate(child1, mutation_rate)
             child2 = self.mutate(child2, mutation_rate)
+            self.mutatione_time += time.perf_counter() - start
             # Ajout des enfants à la nouvelle génération
+            start = time.perf_counter()
             new_population.extend([Planning(festival, child1), Planning(festival, child2)])
+            self.evaluation_time += time.perf_counter() - start
         return new_population
 
     def complete_process_run(self, festival, population_number, generations_number, mutation_rate=0.1):
@@ -394,16 +408,25 @@ class GeneticAlgorithm():
         :type mutation_rate: float
         """
         population = []
+        print('Start')
+        start_time = time.perf_counter()
         for _ in range(population_number):
             individual = Planning(festival=festival)
             population.append(individual)
-        print("Initial generation :")
-        for individual in population:
-            print("\t Individual (score" + str(individual.evaluation_score) + ")")
-            print("\t" + str(individual.schedule))  
-        for round in range(generations_number):
+        self.initial_gen_time = time.perf_counter() - start_time
+        print('Initial population generation over')
+        for gen in range(generations_number):
+            print('gen : ' + str(gen))
             population = self.generate_children(festival, population, mutation_rate)
-            print("Generation " + str(round+1) + " :")
-            for individual in population:
-                print("\t Individual (score" + str(individual.evaluation_score) + ")")
-                print("\t" + str(individual.schedule))
+        print('Final results :')
+        population_sorted = sorted(population, key=lambda x: x.evaluation_score, reverse=True)
+        print(str(population_sorted[0].schedule))
+        print(str(population_sorted[0].evaluation_score))
+        print('Total execution time : ' + str(time.perf_counter() - start_time))
+        print('Initial gen time : ' + str(self.initial_gen_time))
+        print('Total selection time : ' + str(self.selection_time))
+        print('Total crossover time : ' + str(self.crosserover_time))
+        print('Total mutation time : ' + str(self.mutatione_time))
+        print('Total child evaluation time : ' + str(self.evaluation_time))
+
+
