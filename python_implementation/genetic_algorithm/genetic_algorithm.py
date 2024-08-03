@@ -33,6 +33,7 @@ class Planning():
     soft_constraints_time = 0
     temp1 = 0
     temp2 = 0
+
     def __init__(self, festival, schedule=None, json_string_schedule=None):
         """
         Initialization of the Planning object.
@@ -265,8 +266,8 @@ class Planning():
                         if wish.wish_rank == -1:
                             hard_constraints_violations += 1
                             logger.debug_eval("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
+        
         Planning.hard_constraints_time += time.perf_counter() - hard_constraints_start
-
 
         soft_constraints_start = time.perf_counter()
         # --- Contraintes faibles
