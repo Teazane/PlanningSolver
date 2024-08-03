@@ -32,9 +32,10 @@ class Planning():
         self.json_string_schedule = json_string_schedule
         self.evaluation_score = 0
         if schedule is None and json_string_schedule is None:
-            self.generate_schedule()
-            self.schedule_evaluation() # Commented for debug
-            # self.conversion_df_schedule_to_json_string_schedule() # Commented for debug
+            # self.generate_schedule()
+            self.generate_heuristic_schedule()
+            self.schedule_evaluation()
+            # self.conversion_df_schedule_to_json_string_schedule()
         elif schedule is None and json_string_schedule is not None:
             self.conversion_json_string_schedule_to_df_schedule()
             self.schedule_evaluation()
@@ -79,6 +80,99 @@ class Planning():
         # On crée le dataframe avec en index les noms de parties
         self.schedule = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
         return self.schedule
+    
+    def generate_heuristic_schedule(self):
+        """
+        Generate a pandas.DataFrame format schedule where columns are players and time slots, and lines are proposed RPG.
+        
+        For example:
+            - Players are: Alice, Bob and Chris.
+            - Time slots are: saturday afternoon, saturday night and sunday afternoon.
+            - Proposed RPG are: D&D, Alien and MYZ.
+        
+        So the generated schedule will look like: 
+                | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
+        D&D     | NaN   | NaN   | NaN   | NaN     | NaN     | NaN     |
+        Alien   | Nan   | NaN   | NaN   | NaN     | NaN     | NaN     |
+        MYZ     | Nan   | NaN   | NaN   | NaN     | NaN     | NaN     |
+        
+        Then, random boolean values are generated to fill the schedule.
+        
+        For example, in the previous schedule, it could give: 
+                | Alice | Bob   | Chris | sat. a. | sat. n. | sun. a. |
+        D&D     | 1     | 0     | 0     | 1       | 0       | 1       |
+        Alien   | 1     | 1     | 0     | 0       | 1       | 0       |
+        MYZ     | 1     | 0     | 1     | 1       | 0       | 0       |
+
+        The generation is pseudo random as we try to fill some priority constraints:
+            - Players and MJ availabilities
+            - MJ presence
+            - Unique time_slot for a single game
+            - Only one game at a time for each player
+        """
+        # Initialisation
+        # On met les players et time_slots en guise de colonnes (en string pour une liste homogène)
+        columns = []
+        for player in self.festival.players:
+            columns.append(str(player))
+        for time_slot in self.festival.time_slots:
+            columns.append(str(time_slot))
+        # On génère des données = 0
+        data = np.zeros((len(self.festival.proposed_rpgs), len(columns)), dtype=int)
+        # On crée le dataframe avec en index les noms de parties
+        self.schedule = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
+
+        # Remplissage pseudo-aléatoire
+        for rpg in self.festival.proposed_rpgs:
+            # Sélection aléatoire d'un créneau horaire où le MJ est disponible
+            available_timeslots = [ts for ts in self.festival.time_slots if ts in rpg.dm.availabilities]
+            if not available_timeslots:
+                logger.error(rpg.dm.name + " is never available")
+                continue  # Si aucun créneau disponible pour le MJ, ignorer cette partie
+            timeslot = random.choice(available_timeslots)
+            # On met un 1 dans la colonne du time_slot sélectionné au hasard et dans la colonne du MJ
+            self.schedule.loc[rpg, str(timeslot)] = 1
+            self.schedule.loc[rpg, str(rpg.dm)] = 1
+            
+            # On mélange la liste de souhaits pour ajouter de l'aléatoire
+            random.shuffle(self.festival.wishes) 
+            # On choisit un nombre cohérent mais aléatoire de joueurs
+            nb_of_players = random.randint(rpg.player_nb_min, rpg.player_nb_max)
+            assigned_players = 0
+            # Assigner les joueurs disponibles
+            for wish in self.festival.wishes:
+                # Vérifier si le joueur ne veut pas participer à cette partie (wish_rank == -1)
+                if wish.wish_rank == -1:
+                    continue  # Ignorer ce joueur pour cette partie
+                if wish.player != rpg.dm and timeslot in wish.player.availabilities:
+                    # Vérifier si le joueur est déjà assigné à une autre partie à ce créneau
+                    if not self._is_player_assigned(wish.player, timeslot):
+                        self.schedule.loc[rpg, str(wish.player)] = 1
+                        assigned_players += 1
+                        if assigned_players >= nb_of_players:
+                            break
+
+            # Vérifier si le nombre minimal de joueurs est atteint
+            if assigned_players < rpg.player_nb_min:
+                self.schedule.loc[rpg] = 0  # Annuler la partie si le minimum de joueurs n'est pas atteint
+
+        return self.schedule
+
+    def _is_player_assigned(self, player, timeslot):
+        """
+        Check if the player is already assigned to another game at the same timeslot.
+        """
+        player_col = str(player)
+        timeslot_col = str(timeslot)
+        
+        # Création d'un masque pour trouver les lignes où le joueur et le créneau horaire sont tous les deux assignés
+        player_assigned_mask = self.schedule[player_col] == 1
+        timeslot_assigned_mask = self.schedule[timeslot_col] == 1
+        
+        # Application des masques pour compter les lignes correspondantes
+        assigned_count = self.schedule[player_assigned_mask & timeslot_assigned_mask].shape[0]
+        
+        return assigned_count > 0
         
     def schedule_evaluation(self):
         """
@@ -96,7 +190,7 @@ class Planning():
                 # print("Game " + str(game) + " is not played")
                 continue
             else:
-                # On retrouve la partie parmis les parties proposées
+                # On retrouve la partie parmi les parties proposées
                 try:
                     game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
                 except StopIteration:
