@@ -5,6 +5,16 @@ from model import *
 from pandas import DataFrame, Series, concat
 import numpy as np
 
+# Define MESSAGE log level
+DEBUG_EVAL = 9
+logging.DEBUG_EVAL = DEBUG_EVAL
+logging.addLevelName(DEBUG_EVAL, 'DEBUG EVAL')
+
+class MyLogger(logging.Logger):
+    def debug_eval(self, msg, *args, **kwargs):
+        self.log(DEBUG_EVAL, msg, *args, **kwargs) 
+
+logging.setLoggerClass(MyLogger)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -21,6 +31,8 @@ logger.addHandler(file_output)
 class Planning():
     hard_constraints_time = 0
     soft_constraints_time = 0
+    temp1 = 0
+    temp2 = 0
     def __init__(self, festival, schedule=None, json_string_schedule=None):
         """
         Initialization of the Planning object.
@@ -96,7 +108,7 @@ class Planning():
             # Si toutes les colonnes sont égales à 0
             if (self.schedule.loc[game] == 0).all():
                 # La partie n'est pas jouée, pas de violation de contrainte forte 
-                # print("Game " + str(game) + " is not played")
+                logger.debug_eval("Game " + str(game) + " is not played")
                 continue
             else:
                 # On retrouve la partie parmis les parties proposées
@@ -107,22 +119,22 @@ class Planning():
                     continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
                 players = [player for player in self.festival.players if row[player.name] == 1]
 
-                #print("Hard constraints : game : " + str(game))
+                logger.debug_eval("Hard constraints : game : " + str(game))
                 # Vérifier que le MJ est présent
                 if row[game_rpg.dm.name] != 1:
                     hard_constraints_violations += 1
-                    #print("- Absent MJ " + str(game_rpg.dm))
+                    logger.debug_eval("- Absent MJ " + str(game_rpg.dm))
 
                 # Vérifier le nombre de joueurs (sans compter le MJ)
                 if not (game_rpg.player_nb_min <= len(players) - 1 <= game_rpg.player_nb_max):
                     hard_constraints_violations += 1
-                    #print("- Bad player count " + str(len(players)))
+                    logger.debug_eval("- Bad player count " + str(len(players)))
 
                 # Vérifier les disponibilités des joueurs et MJ
                 for player in players:
                     if not any(row[ts.__str__()] == 1 for ts in player.availabilities):
                         hard_constraints_violations += 1
-                        #print("- Player not present " + str(player))
+                        logger.debug_eval("- Player not present " + str(player))
 
                 # Vérifier que chaque joueur n'a pas plusieurs parties en même temps
                 for ts in self.festival.time_slots:
@@ -134,13 +146,13 @@ class Planning():
                                 if(game2.game_title != game.game_title and self.schedule.loc[game2, ts_str] == 1):
                                     if(self.schedule.loc[game2, player.name] == 1):
                                         hard_constraints_violations += 1
-                                        #print("- Player play something else " + str(player) + " " + str(game2))
+                                        logger.debug_eval("- Player play something else " + str(player) + " " + str(game2))
 
                 # Vérifier qu'une partie ne se déroule que sur un seul créneau
                 num_timeslots = sum(row[ts.__str__()] for ts in self.festival.time_slots)
                 if num_timeslots != 1:
                     hard_constraints_violations += 1
-                    #print("- Bad number of timeslot " + str(num_timeslots))
+                    logger.debug_eval("- Bad number of timeslot " + str(num_timeslots))
 
                 # Vérifier les parties incompatibles
                 for conflicting_game in game_rpg.conflicting_rpg:
@@ -150,7 +162,7 @@ class Planning():
                             if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
                                 if player != game_rpg.dm and player != conflicting_game_rpg.dm:
                                     hard_constraints_violations += 1
-                                    #print("- Conflicting game " + str(player) + " " + str(conflicting_game))
+                                    logger.debug_eval("- Conflicting game " + str(player) + " " + str(conflicting_game))
 
                 # Vérifier qu'aucun joueur n'est dans une partie notée à -1
                 for player in players:
@@ -158,14 +170,14 @@ class Planning():
                     for wish in player_wishes:
                         if wish.wish_rank == -1:
                             hard_constraints_violations += 1
-                            #print("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
+                            logger.debug_eval("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
         Planning.hard_constraints_time += time.perf_counter() - hard_constraints_start
 
 
         soft_constraints_start = time.perf_counter()
         # --- Contraintes faibles
         for player in self.festival.players:
-            #print("Soft constraints : player : " + str(player))
+            logger.debug_eval("Soft constraints : player : " + str(player))
             # Calcul du contentement des joueurs de leurs parties attribuées
             player_wishes = [wish for wish in self.festival.wishes if wish.player == player]
             total_wish = 0
@@ -174,7 +186,7 @@ class Planning():
                 if self.schedule.loc[wished_game, player.name] == 1:
                     soft_constraints_score += wish.wish_rank
                     total_wish += wish.wish_rank
-            #print("- Total game score " + str(total_wish))
+            logger.debug_eval("- Total game score " + str(total_wish))
 
             # Moments de pause
             obtained_pauses = 0
@@ -195,7 +207,7 @@ class Planning():
                     # Pénaliser les pauses supplémentaires non souhaitées
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
                     total_pauses -= 1
-            #print("- Total pause score " + str(total_pauses) + " (" + str(obtained_pauses) + ")")
+            logger.debug_eval("- Total pause score " + str(total_pauses) + " (" + str(obtained_pauses) + ")")
         
         # Respect des créneaux préférentiels
         for index, row in self.schedule.iterrows():
@@ -203,16 +215,16 @@ class Planning():
             try:
                 game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == game.game_title)
             except StopIteration:
-                #print("Game not found: " + game.game_title)
+                logger.debug_eval("Game not found: " + game.game_title)
                 continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
-            #print("Soft constraints : game : " + str(game))
+            logger.debug_eval("Soft constraints : game : " + str(game))
             total_game = 0
             if game_rpg.best_moment:
                 preferred_ts = [ts for ts in self.festival.time_slots if ts.moment == game_rpg.best_moment]
                 if not any(row[ts.__str__()] == 1 for ts in preferred_ts):
                     soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
                     total_game -= 1
-            #print("- Total game timeslot score " + str(total_game))
+            logger.debug_eval("- Total game timeslot score " + str(total_game))
         Planning.soft_constraints_time += time.perf_counter() - soft_constraints_start
 
         # Calcul final du score
@@ -447,6 +459,8 @@ class GeneticAlgorithm():
         logger.info('Total child evaluation time: ' + str(self.evaluation_time))
         logger.info('Total hard constraints time : ' + str(Planning.hard_constraints_time))
         logger.info('Total soft constraints time : ' + str(Planning.soft_constraints_time))
+        logger.info('Temp 1 : ' + str(Planning.temp1))
+        logger.info('Temp 2 : ' + str(Planning.temp2))
         logger.info('-------- End --------')
 
 
