@@ -22,7 +22,7 @@ julien = Player("Julien", [13, 9, 4], [mercredi_soir, jeudi_am, jeudi_soir, vend
 lorraine = Player("Lorraine", [13, 8, 5, 4], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
 lucile = Player("Lucile", [], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
 marion = Player("Marion", [11, 7, 2], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
-morgane = Player("Morgane", [], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
+morgane = Player("Morgane", [10, 6], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
 pierre = Player("Pierre", [], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
 remi = Player("Rémi", [], [mercredi_soir, jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
 sean = Player("Sean", [9, 8, 7, 6], [jeudi_am, jeudi_soir, vendredi_am, vendredi_soir, samedi_am, samedi_soir])
@@ -122,7 +122,16 @@ marion_wish_10 = Wish(marion, ryuutama, 3)
 marion_wish_11 = Wish(marion, root, 10)
 marion_wish_12 = Wish(marion, scion, 12)
 # Voeux de Morgane
-# TODO
+morgane_wish_1 = Wish(morgane, stonebelow, 11)
+morgane_wish_2 = Wish(morgane, vaesen, 13)
+morgane_wish_3 = Wish(morgane, veggie_patch, 9)
+morgane_wish_4 = Wish(morgane, ten_candles, 7)
+morgane_wish_5 = Wish(morgane, zombie, 8)
+morgane_wish_6 = Wish(morgane, bebop, 15)
+morgane_wish_7 = Wish(morgane, lalaland, 5)
+morgane_wish_8 = Wish(morgane, tftl, 12)
+morgane_wish_9 = Wish(morgane, magical_girl, 4)
+morgane_wish_10 = Wish(morgane, scion, 14)
 # Voeux de Pierre
 pierre_wish_1 = Wish(pierre, stonebelow, 10)
 pierre_wish_2 = Wish(pierre, vaesen, 11)
@@ -201,6 +210,7 @@ festanche = Festival(
                     lorraine_wish_1, lorraine_wish_2, lorraine_wish_3, lorraine_wish_4, lorraine_wish_5, lorraine_wish_6, lorraine_wish_7, lorraine_wish_8, lorraine_wish_9, lorraine_wish_10, lorraine_wish_11, lorraine_wish_12, 
                     lucile_wish_1, lucile_wish_2, lucile_wish_3, lucile_wish_4, lucile_wish_5, lucile_wish_6, lucile_wish_7, lucile_wish_8, lucile_wish_9, lucile_wish_10, 
                     marion_wish_1, marion_wish_2, marion_wish_3, marion_wish_4, marion_wish_5, marion_wish_6, marion_wish_7, marion_wish_8, marion_wish_9, marion_wish_10, marion_wish_11, marion_wish_12, 
+                    morgane_wish_1, morgane_wish_2, morgane_wish_3, morgane_wish_4, morgane_wish_5, morgane_wish_6, morgane_wish_7, morgane_wish_8, morgane_wish_9, morgane_wish_10, 
                     pierre_wish_1, pierre_wish_2, pierre_wish_3, pierre_wish_4, pierre_wish_5, pierre_wish_6, pierre_wish_7, pierre_wish_8, pierre_wish_9, pierre_wish_10, pierre_wish_11, pierre_wish_12, 
                     sean_wish_1, sean_wish_2, sean_wish_3, sean_wish_4, sean_wish_5, sean_wish_6, sean_wish_7, sean_wish_8, sean_wish_9, sean_wish_10, sean_wish_11, sean_wish_12, 
                     thomas_wish_1, thomas_wish_2, thomas_wish_3, thomas_wish_4, thomas_wish_5, thomas_wish_6, thomas_wish_7, thomas_wish_8, thomas_wish_9, thomas_wish_10, thomas_wish_11, thomas_wish_12, 
