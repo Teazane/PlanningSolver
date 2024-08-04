@@ -128,9 +128,9 @@ class Planning():
         # On met les players et time_slots en guise de colonnes (en string pour une liste homogène)
         columns = []
         for player in self.festival.players:
-            columns.append(str(player))
+            columns.append(player)
         for time_slot in self.festival.time_slots:
-            columns.append(str(time_slot))
+            columns.append(time_slot)
         # On génère des données = 0
         data = np.zeros((len(self.festival.proposed_rpgs), len(columns)), dtype=int)
         # On crée le dataframe avec en index les noms de parties
