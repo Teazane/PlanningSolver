@@ -213,6 +213,7 @@ class Planning():
                     logger.error("Game not found: " + game.game_title)
                     continue # Si la partie n'est pas censée exister, on passe à la ligne suivante de la matrice
                 players = [player for player in self.festival.players if row[player.name] == 1]
+                timeslots = [timeslot for timeslot in self.festival.time_slots if row[str(timeslot)] == 1]
 
                 logger.debug_eval("Hard constraints : game : " + str(game))
                 # Vérifier que le MJ est présent
@@ -225,48 +226,41 @@ class Planning():
                     hard_constraints_violations += 1
                     logger.debug_eval("- Bad player count " + str(len(players)))
 
-                # Vérifier les disponibilités des joueurs et MJ
                 for player in players:
+                    # Vérifier les disponibilités des joueurs et MJ
                     if not any(row[ts.__str__()] == 1 for ts in player.availabilities):
                         hard_constraints_violations += 1
                         logger.debug_eval("- Player not present " + str(player))
 
-                # Vérifier que chaque joueur n'a pas plusieurs parties en même temps
-                for ts in self.festival.time_slots:
-                    ts_str = ts.__str__()
-                    if row[ts_str] == 1:
-                        for player in players:
-                            for index2, row2 in self.schedule.iterrows():
-                                game2 = index2
-                                if(game2.game_title != game.game_title and self.schedule.loc[game2, ts_str] == 1):
-                                    if(self.schedule.loc[game2, player.name] == 1):
-                                        hard_constraints_violations += 1
-                                        logger.debug_eval("- Player play something else " + str(player) + " " + str(game2))
+                    # Vérifier que chaque joueur n'a pas plusieurs parties en même temps
+                    for timeslot in timeslots:
+                        for game2 in self.schedule.index:
+                            if(game2.game_title != game.game_title and self.schedule.loc[game2, str(timeslot)] == 1 and self.schedule.loc[game2, player.name] == 1):
+                                hard_constraints_violations += 1
+                                logger.debug_eval("- Player play something else " + str(player) + " " + str(game2))
 
-                # Vérifier qu'une partie ne se déroule que sur un seul créneau
-                num_timeslots = sum(row[ts.__str__()] for ts in self.festival.time_slots)
-                if num_timeslots != 1:
-                    hard_constraints_violations += 1
-                    logger.debug_eval("- Bad number of timeslot " + str(num_timeslots))
 
-                # Vérifier les parties incompatibles
-                for conflicting_game in game_rpg.conflicting_rpg:
-                    if conflicting_game.game_title in self.schedule.index:
+                    # Vérifier les parties incompatibles
+                    for conflicting_game in game_rpg.conflicting_rpg:
                         conflicting_game_rpg = next(rpg for rpg in self.festival.proposed_rpgs if rpg.game_title == conflicting_game.game_title)
-                        for player in players:
-                            if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
-                                if player != game_rpg.dm and player != conflicting_game_rpg.dm:
-                                    hard_constraints_violations += 1
-                                    logger.debug_eval("- Conflicting game " + str(player) + " " + str(conflicting_game))
+                        if self.schedule.loc[conflicting_game.game_title, player.name] == 1:
+                            if player != game_rpg.dm and player != conflicting_game_rpg.dm:
+                                hard_constraints_violations += 1
+                                logger.debug_eval("- Conflicting game " + str(player) + " " + str(conflicting_game))
 
-                # Vérifier qu'aucun joueur n'est dans une partie notée à -1
-                for player in players:
+                    # Vérifier qu'aucun joueur n'est dans une partie notée à -1
                     player_wishes = [wish for wish in self.festival.wishes if (wish.player == player and wish.proposed_rpg == game)]
                     for wish in player_wishes:
                         if wish.wish_rank == -1:
                             hard_constraints_violations += 1
                             logger.debug_eval("- Player " + str(player) + " would rather run naked in the woods than play " + str(game))
-        
+
+                # Vérifier qu'une partie ne se déroule que sur un seul créneau
+                num_timeslots = len(timeslots)
+                if num_timeslots != 1:
+                    hard_constraints_violations += 1
+                    logger.debug_eval("- Bad number of timeslot " + str(num_timeslots))
+
         Planning.hard_constraints_time += time.perf_counter() - hard_constraints_start
 
         soft_constraints_start = time.perf_counter()
@@ -284,14 +278,8 @@ class Planning():
             logger.debug_eval("- Total game score " + str(total_wish))
 
             # Moments de pause
-            obtained_pauses = 0
-            for ts in self.festival.time_slots:
-                ts_str = ts.__str__()
-                df_filtered = self.schedule.loc[(self.schedule[ts_str] == 1) & (self.schedule[player.name] == 1)]
-                number_of_rows = df_filtered.shape[0]
-                if number_of_rows == 0:
-                    obtained_pauses += 1
-        
+            played_games = self.schedule.loc[:, player.name]
+            obtained_pauses = len(player.availabilities) - sum(played_games)
             sorted_pause_wishes = sorted(player.pause_wishes, reverse=True)
             total_pauses = 0
             for i in range(obtained_pauses):
