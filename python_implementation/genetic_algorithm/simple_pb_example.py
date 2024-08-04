@@ -109,7 +109,6 @@ festanche = Festival(
 # # Test de l'objet Planning
 # planning = Planning(festanche)
 # print(planning.schedule)
-# planning.schedule_evaluation()
 # print(planning.evaluation_score)
 
 # Test de l'algorithme
