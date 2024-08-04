@@ -46,8 +46,8 @@ class Planning():
         self.json_string_schedule = json_string_schedule
         self.evaluation_score = 0
         if schedule is None and json_string_schedule is None:
-            self.generate_schedule()
-            # self.generate_heuristic_schedule()
+            # self.generate_schedule()
+            self.generate_heuristic_schedule()
             self.schedule_evaluation()
             # self.conversion_df_schedule_to_json_string_schedule()
         elif schedule is None and json_string_schedule is not None:
@@ -145,8 +145,8 @@ class Planning():
                 continue  # Si aucun créneau disponible pour le MJ, ignorer cette partie
             timeslot = random.choice(available_timeslots)
             # On met un 1 dans la colonne du time_slot sélectionné au hasard et dans la colonne du MJ
-            self.schedule.loc[rpg, str(timeslot)] = 1
-            self.schedule.loc[rpg, str(rpg.dm)] = 1
+            self.schedule.loc[rpg, timeslot] = 1
+            self.schedule.loc[rpg, rpg.dm] = 1
             
             # On mélange la liste de souhaits pour ajouter de l'aléatoire
             random.shuffle(self.festival.wishes) 
@@ -161,7 +161,7 @@ class Planning():
                 if wish.player != rpg.dm and timeslot in wish.player.availabilities:
                     # Vérifier si le joueur est déjà assigné à une autre partie à ce créneau
                     if not self._is_player_assigned(wish.player, timeslot):
-                        self.schedule.loc[rpg, str(wish.player)] = 1
+                        self.schedule.loc[rpg, wish.player] = 1
                         assigned_players += 1
                         if assigned_players >= nb_of_players:
                             break
@@ -176,12 +176,9 @@ class Planning():
         """
         Check if the player is already assigned to another game at the same timeslot.
         """
-        player_col = str(player)
-        timeslot_col = str(timeslot)
-        
         # Création d'un masque pour trouver les lignes où le joueur et le créneau horaire sont tous les deux assignés
-        player_assigned_mask = self.schedule[player_col] == 1
-        timeslot_assigned_mask = self.schedule[timeslot_col] == 1
+        player_assigned_mask = self.schedule[player] == 1
+        timeslot_assigned_mask = self.schedule[timeslot] == 1
         
         # Application des masques pour compter les lignes correspondantes
         assigned_count = self.schedule[player_assigned_mask & timeslot_assigned_mask].shape[0]
