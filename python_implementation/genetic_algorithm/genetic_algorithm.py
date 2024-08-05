@@ -270,8 +270,13 @@ class Planning():
             logger.debug_eval("- Total game score " + str(total_wish))
 
             # Moments de pause
-            played_games = self.schedule.loc[:, player.name]
-            obtained_pauses = len(player.availabilities) - sum(played_games)
+            obtained_pauses = 0
+            for ts in self.festival.time_slots:
+                ts_str = ts.__str__()
+                df_filtered = self.schedule.loc[(self.schedule[ts_str] == 1) & (self.schedule[player.name] == 1)]
+                number_of_rows = df_filtered.shape[0]
+                if number_of_rows == 0:
+                    obtained_pauses += 1
             sorted_pause_wishes = sorted(player.pause_wishes, reverse=True)
             total_pauses = 0
             for i in range(obtained_pauses):
@@ -280,8 +285,8 @@ class Planning():
                     total_pauses += sorted_pause_wishes[i]
                 else:
                     # Pénaliser les pauses supplémentaires non souhaitées
-                    soft_constraints_score -= 1 # TODO: voir si 1 est assez pénalisant
-                    total_pauses -= 1
+                    soft_constraints_score -= 100 # TODO: voir si 1 est assez pénalisant
+                    total_pauses -= 100
             logger.debug_eval("- Total pause score " + str(total_pauses) + " (" + str(obtained_pauses) + ")")
         
         # Respect des créneaux préférentiels
