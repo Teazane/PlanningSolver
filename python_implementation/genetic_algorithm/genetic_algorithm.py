@@ -96,7 +96,7 @@ class Planning():
         self.schedule = DataFrame(data=data, index=self.festival.proposed_rpgs, columns=columns)
         return self.schedule
     
-    def generate_heuristic_schedule(self):
+    def generate_heuristic_schedule(self, empty_game_rate=0.1):
         """
         Generate a pandas.DataFrame format schedule where columns are players and time slots, and lines are proposed RPG.
         
@@ -123,7 +123,8 @@ class Planning():
             - Players and MJ availabilities
             - MJ presence
             - Unique time_slot for a single game
-            - Only one game at a time for each player
+            - Valid number of players
+        The probability of an empty (cancelled) game is set with empty_game_rate.
         """
         # Initialisation
         # On met les players et time_slots en guise de colonnes (en string pour une liste homogène)
@@ -139,38 +140,29 @@ class Planning():
 
         # Remplissage pseudo-aléatoire
         for rpg in self.festival.proposed_rpgs:
-            # Sélection aléatoire d'un créneau horaire où le MJ est disponible
-            available_timeslots = [ts for ts in self.festival.time_slots if ts in rpg.dm.availabilities]
-            if not available_timeslots:
-                logger.error(rpg.dm.name + " is never available")
-                continue  # Si aucun créneau disponible pour le MJ, ignorer cette partie
-            timeslot = random.choice(available_timeslots)
-            # On met un 1 dans la colonne du time_slot sélectionné au hasard et dans la colonne du MJ
-            self.schedule.loc[rpg, str(timeslot)] = 1
-            self.schedule.loc[rpg, str(rpg.dm)] = 1
-            
-            # On mélange la liste de souhaits pour ajouter de l'aléatoire
-            random.shuffle(self.festival.wishes) 
-            # On choisit un nombre cohérent mais aléatoire de joueurs
-            nb_of_players = random.randint(rpg.player_nb_min, rpg.player_nb_max)
-            assigned_players = 0
-            # Assigner les joueurs disponibles
-            for wish in self.festival.wishes:
-                # Vérifier si le joueur ne veut pas participer à cette partie (wish_rank == -1)
-                if wish.wish_rank == -1:
-                    continue  # Ignorer ce joueur pour cette partie
-                if wish.player != rpg.dm and timeslot in wish.player.availabilities:
-                    # Vérifier si le joueur est déjà assigné à une autre partie à ce créneau
-                    if not self._is_player_assigned(wish.player, timeslot):
-                        self.schedule.loc[rpg, str(wish.player)] = 1
-                        assigned_players += 1
-                        if assigned_players >= nb_of_players:
-                            break
-
-            # Vérifier si le nombre minimal de joueurs est atteint
-            if assigned_players < rpg.player_nb_min:
-                self.schedule.loc[rpg] = 0  # Annuler la partie si le minimum de joueurs n'est pas atteint
-
+            # Annuler la partie de façon aléatoire
+            rand = random.random()
+            if rand < empty_game_rate:
+                self.schedule.loc[rpg] = 0  # Annuler
+            else:
+                # Sélection aléatoire d'un créneau horaire où le MJ est disponible
+                available_timeslots = [ts for ts in self.festival.time_slots if ts in rpg.dm.availabilities]
+                if not available_timeslots:
+                    logger.error(rpg.dm.name + " is never available")
+                    continue  # Si aucun créneau disponible pour le MJ, ignorer cette partie
+                timeslot = random.choice(available_timeslots)
+                # On met un 1 dans la colonne du time_slot sélectionné au hasard et dans la colonne du MJ
+                self.schedule.loc[rpg, str(timeslot)] = 1
+                self.schedule.loc[rpg, str(rpg.dm)] = 1
+                # On choisit un nombre cohérent mais aléatoire de joueurs
+                nb_of_players = random.randint(rpg.player_nb_min, rpg.player_nb_max)
+                # On prend les joueurs disponibles
+                available_players = [player for player in self.festival.players if timeslot in rpg.dm.availabilities]
+                # On choisit parmi ces joueurs au pif 
+                random_player_selection = random.sample(available_players, nb_of_players)
+                # Assigner les joueurs disponibles
+                for player in random_player_selection:
+                    self.schedule.loc[rpg, str(player)] = 1
         return self.schedule
 
     def _is_player_assigned(self, player, timeslot):
@@ -454,6 +446,47 @@ class GeneticAlgorithm():
                     mutated_schedule.at[index, col] = 1 - row[col]
         return mutated_schedule
     
+    def mutate_date(self, schedule, mutation_rate, festival):
+        """
+        Create a mutation in a schedule by moving a '1' from one time slot to another.
+
+        :param schedule: DataFrame representing the original schedule
+        :param mutation_rate: Mutation rate (probability of mutation for each row)
+        :param festival: Festival information
+        :type schedule: pandas.DataFrame
+        :type mutation_rate: float
+        :type festival: model.Festival
+        :return: DataFrame representing the mutated schedule
+        :rtype: pandas.DataFrame
+        """
+        mutated_schedule = schedule.copy()
+        time_slot_columns = [str(ts) for ts in festival.time_slots]
+        for index, row in mutated_schedule.iterrows():
+            if random.random() < mutation_rate:
+                # Find the current time slot with a '1'
+                current_slots = row[time_slot_columns]
+                # Renvoie l'index de la première occurrence du maximum (donc 1) dans la série current_slots.
+                current_time_slot_index = current_slots.idxmax() 
+                # On renvoie la valeur maximale de la série current_slots. 
+                # Dans le contexte du problème, cela signifie qu'on cherche à déterminer si la valeur maximale est 1 (partie programmée) ou 0 (aucune partie programmée).
+                # En pratique, cela vérifie simplement s'il y a un 1 dans la ligne, c'est-à-dire si une partie est effectivement programmée dans un créneau horaire.
+                current_time_slot_value = current_slots.max()
+
+                # Only proceed if there is a '1' in the current row
+                if current_time_slot_value == 1:
+                    # Select a new time slot different from the current one
+                    available_time_slots = [ts for ts in time_slot_columns if ts != current_time_slot_index]
+                    new_time_slot = random.choice(available_time_slots)
+                    # Move '1' to the new time slot and set the old one to '0'
+                    mutated_schedule.at[index, current_time_slot_index] = 0
+                    mutated_schedule.at[index, new_time_slot] = 1
+                # else: # TODO: A revoir : est-ce que c'est pas mieux qu'une partie soit annulée ? Quid d'une mutation qui annule une partie ?
+                #     # If no '1' is present, randomly assign one in a time slot
+                #     new_time_slot = random.choice(time_slot_columns)
+                #     mutated_schedule.at[index, new_time_slot] = 1
+
+        return mutated_schedule
+    
     def tournament_selection(self, population, k=10):
         """
         Select a parent by tournament method.
@@ -498,8 +531,10 @@ class GeneticAlgorithm():
             self.crosserover_time +=  time.perf_counter() - start
             # Mutation
             start = time.perf_counter()
-            child1 = self.mutate(child1, mutation_rate)
-            child2 = self.mutate(child2, mutation_rate)
+            child1 = self.mutate_date(child1, mutation_rate, festival)
+            child2 = self.mutate_date(child2, mutation_rate, festival)
+            # child1 = self.mutate(child1, mutation_rate)
+            # child2 = self.mutate(child2, mutation_rate)
             self.mutatione_time += time.perf_counter() - start
             # Ajout des enfants à la nouvelle génération
             start = time.perf_counter()
