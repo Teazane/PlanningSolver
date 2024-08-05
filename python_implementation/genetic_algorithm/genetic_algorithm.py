@@ -422,9 +422,10 @@ class GeneticAlgorithm():
         # Assurez-vous que les parents ont la même structure
         assert planning_1.schedule.shape == planning_2.schedule.shape
         # Choisir un point de croisement aléatoire
-        crossover_point = random.randint(1, planning_1.schedule.shape[0] - 1)
+        crossover_point = random.randint(0, planning_1.schedule.shape[0]-1)
+        crossover_point2 = random.randint(min(crossover_point+1, planning_1.schedule.shape[0]), planning_1.schedule.shape[0])
         # Créer l'enfant en combinant les parents
-        child = concat([planning_1.schedule.iloc[:crossover_point], planning_2.schedule.iloc[crossover_point:]], axis=0)
+        child = concat([planning_1.schedule.iloc[:crossover_point], planning_2.schedule.iloc[crossover_point:crossover_point2], planning_1.schedule.iloc[crossover_point2:]], axis=0)
         return child
     
     def mutate(self, schedule, mutation_rate):
@@ -542,7 +543,7 @@ class GeneticAlgorithm():
             self.evaluation_time += time.perf_counter() - start
         return new_population
 
-    def complete_process_run(self, festival, population_number, generations_number, mutation_rate=0):
+    def complete_process_run(self, festival, population_number, generations_number, mutation_rate=0, population_replacement_number =100):
         """
         Run a complete process of genetic algorithm
 
@@ -568,13 +569,16 @@ class GeneticAlgorithm():
         for gen in range(generations_number):
             logger.debug('Generation: ' + str(gen))
             # On garde les parents qu'on trie
-            old_generation = sorted(population, key=lambda x: x.evaluation_score, reverse=True)
+            old_generation = population
             # On génère une nouvelle population qui remplace l'ancienne
-            population = self.generate_children(festival, population, mutation_rate)
-            population = sorted(population, key=lambda x: x.evaluation_score, reverse=True)
-            # On remplace les 10 pires enfants par les 10 meilleurs parents
-            population[-10:] = old_generation[:10]
-            population = sorted(population, key=lambda x: x.evaluation_score, reverse=True)
+            new_population = self.generate_children(festival, population, mutation_rate)
+            # On récupère les meilleurs individus des parents + enfants
+            population = sorted(old_generation + new_population, key=lambda x: x.evaluation_score, reverse=True)
+            # On ajoute de nouveaux individus aléatoires
+            population = population[:(population_number - population_replacement_number)]
+            for _ in range (population_replacement_number):
+                new_ind = Planning(festival=festival)
+                population.append(new_ind)
             logger.info('Best of generation ' + str(gen) + ': ' + str(population[0].evaluation_score))
             # Extraire les scores des objets
             scores = [individual.evaluation_score for individual in population]
